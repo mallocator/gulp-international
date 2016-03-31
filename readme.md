@@ -15,7 +15,7 @@ Features (cause we all love features):
  * Custom language descriptors
  * Custom filename format
  * Custom translation source directory
- * Read from .json, .js or .ini file 
+ * Read from .json, .js, .ini or .csv file (for examples check the test folder)
  
 
 ## Install

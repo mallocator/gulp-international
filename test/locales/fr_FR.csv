@@ -1,0 +1,4 @@
+,token1,,contenu1
+section1,token2,,contenu2
+section1,subsection1,token3,contenu3
+invalid,checkquote,,"This is something that should, could and would be \"tested\""
