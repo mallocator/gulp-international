@@ -45,7 +45,7 @@ function helper() {
 describe('gulp-international', () => {
 
 
-  it('should be able to replace token with a default configuration', () => {
+  it('should be able to replace token with a default configuration', done => {
     var options = {
       locales: 'test/locales'
     };
@@ -56,11 +56,12 @@ describe('gulp-international', () => {
       expect(files.length).to.equal(3);
       expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
+      done();
     });
   });
 
 
-  it('should be able to replace token with custom suffix delimiters', () => {
+  it('should be able to replace token with custom suffix delimiters', done => {
     var content = '<html><body><h1>${token1}</h1></body></html>';
     var options = {
       locales: 'test/locales',
@@ -71,11 +72,12 @@ describe('gulp-international', () => {
     };
     helper(options, content , files => {
       expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
+      done();
     });
   });
 
 
-  it('should be able to replace token with custom suffix delimiters', () => {
+  it('should be able to replace token with custom suffix delimiters', done => {
     var options = {
       locales: 'test/locales',
       whitelist: 'en_US'
@@ -84,11 +86,28 @@ describe('gulp-international', () => {
       expect(files.length).to.equal(1);
       expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>content1</h1></body></html>');
       expect(files[0].path).to.equal('test/helloworld-en_US.html');
+      done();
     });
   });
 
 
-  it('should leave files without tokens unprocessed', () => {
+  it('should not process languages on the blacklist', done => {
+    var options = {
+      locales: 'test/locales',
+      blacklist: 'en_US'
+    };
+    helper(options, files => {
+      expect(files.length).to.equal(2);
+      expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
+      expect(files[0].path).to.equal('test/helloworld-de_DE.html');
+      expect(files[1].contents.toString('utf8')).to.equal('<html><body><h1>conteúdo1</h1></body></html>');
+      expect(files[1].path).to.equal('test/helloworld-pt-BR.html');
+      done();
+    });
+  });
+
+
+  it('should leave files without tokens unprocessed', done => {
     var content = '<html><body>Not replaced</body></html>';
     var options = {
       locales: 'test/locales'
@@ -97,11 +116,12 @@ describe('gulp-international', () => {
       expect(files.length).to.equal(3);
       expect(files[0].contents.toString('utf8')).to.equal('<html><body>Not replaced</body></html>');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
+      done();
     });
   });
 
 
-  it('should be able to process an empty file', () => {
+  it('should be able to process an empty file', done => {
     var content = '';
     var options = {
       locales: 'test/locales'
@@ -110,11 +130,12 @@ describe('gulp-international', () => {
       expect(files.length).to.equal(3);
       expect(files[0].contents.toString('utf8')).to.equal('');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
+      done();
     });
   });
 
 
-  it('should be able to processes nested keys', () => {
+  it('should be able to processes nested keys', done => {
     var content = '<html><body><h1>R.section1.token2</h1></body></html>';
     var options = {
       locales: 'test/locales'
@@ -125,6 +146,21 @@ describe('gulp-international', () => {
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
       expect(files[1].contents.toString('utf8')).to.equal('<html><body><h1>content2</h1></body></html>');
       expect(files[1].path).to.equal('test/helloworld-en_US.html');
+      done();
     });
   });
+
+
+  it('should support a custom filename format', done => {
+    var options = {
+      locales: 'test/locales',
+      filename: '${lang}/${name}.${ext}'
+    };
+    helper(options, files => {
+      expect(files[0].path).to.equal('de_DE/helloworld.html');
+      expect(files[1].path).to.equal('en_US/helloworld.html');
+      expect(files[2].path).to.equal('pt-BR/helloworld.html');
+      done();
+    });
+  })
 });

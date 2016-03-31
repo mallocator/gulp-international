@@ -25,7 +25,8 @@ var defaults = {
     prefix: 'R.',
     stopCondition: /[;,<>\{}()\[\]"'\s$]/
   },
-  filenamePattern: '${path}/${name}-${lang}.${ext}'
+  filename: '${path}/${name}-${lang}.${ext}',
+  blacklist: []
 };
 
 /**
@@ -99,7 +100,7 @@ function translate(options, contents, copied) {
   var processed = {};
   for (var lang in dictionaries) {
     if (!options.whitelist || options.whitelist.indexOf(lang) != -1) {
-      if (!processed[lang]) {
+      if (!processed[lang] && options.blacklist.indexOf(lang) == -1) {
         processed[lang] = '';
       }
     }
@@ -159,7 +160,7 @@ function replace(file, options) {
     params.path = file.base.substr(0, file.base.length - 1);
     params.lang = lang;
 
-    var filePath = options.filenamePattern;
+    var filePath = options.filename;
     for (var param in params) {
       filePath = filePath.replace('${' + param + '}', params[param]);
     }
@@ -181,6 +182,12 @@ function replace(file, options) {
  * @param options
  */
 module.exports = function (options) {
+  if (options.whitelist && !_.isArray(options.whitelist)) {
+    options.whitelist = [options.whitelist];
+  }
+  if (options.blacklist && !_.isArray(options.blacklist)) {
+    options.blacklist = [options.blacklist];
+  }
   options = _.assign({}, defaults, options);
   load(options);
 
