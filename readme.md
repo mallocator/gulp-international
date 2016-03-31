@@ -107,4 +107,4 @@ generated. The option is ignored if it is missing.
 Type: Array(string)
 Default: ```undefined```
 
-The opposite of the whitelist. Any language specified here will be ignored during processing. 
+The opposite of the whitelist. Any language specified here will be ignored during processing.

@@ -34,7 +34,7 @@ function helper() {
     files.push(file);
   });
   stream.on('finish', () => {
-    validatorCb(files, stream.options);
+    validatorCb(files, plugin.options);
   });
   stream.write(new File({
     path: 'test/helloworld.html',
@@ -179,7 +179,9 @@ describe('gulp-international', () => {
 
 
   it('should throw an error if a file is a stream', () => {
-    var stream = plugin();
+    var stream = plugin({
+      locales: 'test/locales'
+    });
     try {
       stream.write(new File({
         path: 'test/helloworld.html',
