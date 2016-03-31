@@ -108,3 +108,11 @@ Type: Array(string)
 Default: ```undefined```
 
 The opposite of the whitelist. Any language specified here will be ignored during processing.
+
+
+### warn
+
+Type: boolean
+Default: ```true```
+
+This enables warning to be printed out if any tokens are missing.

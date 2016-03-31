@@ -26,7 +26,8 @@ var defaults = {
     stopCondition: /[;,<>\{}()\[\]"'\s$]/
   },
   filename: '${path}/${name}-${lang}.${ext}',
-  blacklist: []
+  blacklist: [],
+  warn: true
 };
 
 /**
@@ -202,10 +203,14 @@ function translate(options, contents, copied) {
 
     for (var lang in processed) {
       processed[lang] += contents.substring(copied, i);
-      processed[lang] += dictionaries[lang][key];
+      if (dictionaries[lang][key]) {
+        processed[lang] += dictionaries[lang][key];
+      } else if(options.warn) {
+        gutil.log('Missing translation in language', lang, 'for key', key);
+      }
       processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
-      copied = next;
     }
+    copied = next;
 
     i = next;
   }
