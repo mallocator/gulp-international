@@ -1,0 +1,50 @@
+{
+  "name": "gulp-international",
+  "version": "0.0.1",
+  "description": "A gulp plugin that creates multi language versions of your source files",
+  "license": "Apache-2.0",
+  "homepage": "http://github.com/mallocator/gulp-international",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/mallocator/gulp-international.git"
+  },
+  "author": {
+    "name": "Ravi Gairola",
+    "email": "mallox@pyxzl.net",
+    "url": "https://github.com/mallocator"
+  },
+  "bugs": {
+    "url": "http://github.com/mallocator/gulp-international/issues",
+    "email": "mallox@pyxzl.net"
+  },
+  "engine": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "istanbul cover _mocha",
+    "test-travis": "istanbul cover _mocha --report lcovonly -- -R spec"
+  },
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "gulpplugin",
+    "i18n",
+    "internationalization",
+    "replace",
+    "substitute"
+  ],
+  "dependencies": {
+    "flat": "^2.0.0",
+    "gulp-util": "^3.0.1",
+    "lodash": "^4.6.1",
+    "through2": "^0.6.3"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.2",
+    "mocha": "^2.4.5",
+    "mocha-lcov-reporter": "^1.2.0"
+  }
+}
