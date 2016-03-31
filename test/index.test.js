@@ -56,7 +56,7 @@ describe('gulp-international', () => {
     helper(options, (files, options) => {
       expect(options.delimiter.prefix.length).to.be.gt(0);
       expect(options.delimiter.stopCondition).to.be.a('RegExp');
-      expect(files.length).to.equal(3);
+      expect(files.length).to.equal(4);
       expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
       done();
@@ -80,7 +80,7 @@ describe('gulp-international', () => {
   });
 
 
-  it('should be able to replace token with custom suffix delimiters', done => {
+  it('should be able to limit languages to a whitelist', done => {
     var options = {
       locales: 'test/locales',
       whitelist: 'en_US'
@@ -100,11 +100,11 @@ describe('gulp-international', () => {
       blacklist: 'en_US'
     };
     helper(options, files => {
-      expect(files.length).to.equal(2);
+      expect(files.length).to.equal(3);
       expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
-      expect(files[1].contents.toString('utf8')).to.equal('<html><body><h1>conteúdo1</h1></body></html>');
-      expect(files[1].path).to.equal('test/helloworld-pt-BR.html');
+      expect(files[2].contents.toString('utf8')).to.equal('<html><body><h1>conteúdo1</h1></body></html>');
+      expect(files[2].path).to.equal('test/helloworld-pt-BR.html');
       done();
     });
   });
@@ -116,7 +116,7 @@ describe('gulp-international', () => {
       locales: 'test/locales'
     };
     helper(options, content, files => {
-      expect(files.length).to.equal(3);
+      expect(files.length).to.equal(4);
       expect(files[0].contents.toString('utf8')).to.equal('<html><body>Not replaced</body></html>');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
       done();
@@ -130,7 +130,7 @@ describe('gulp-international', () => {
       locales: 'test/locales'
     };
     helper(options, content, files => {
-      expect(files.length).to.equal(3);
+      expect(files.length).to.equal(4);
       expect(files[0].contents.toString('utf8')).to.equal('');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
       done();
@@ -144,11 +144,25 @@ describe('gulp-international', () => {
       locales: 'test/locales'
     };
     helper(options, content, files => {
-      expect(files.length).to.equal(3);
+      expect(files.length).to.equal(4);
       expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt2</h1></body></html>');
       expect(files[0].path).to.equal('test/helloworld-de_DE.html');
       expect(files[1].contents.toString('utf8')).to.equal('<html><body><h1>content2</h1></body></html>');
       expect(files[1].path).to.equal('test/helloworld-en_US.html');
+      done();
+    });
+  });
+
+
+  it('should be able to use csv data as translation files', done => {
+    var options = {
+      locales: 'test/locales',
+      whitelist: 'fr_FR'
+    };
+    helper(options, files => {
+      expect(files.length).to.equal(1);
+      expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>contenu1</h1></body></html>');
+      expect(files[0].path).to.equal('test/helloworld-fr_FR.html');
       done();
     });
   });
@@ -162,7 +176,8 @@ describe('gulp-international', () => {
     helper(options, files => {
       expect(files[0].path).to.equal('de_DE/helloworld.html');
       expect(files[1].path).to.equal('en_US/helloworld.html');
-      expect(files[2].path).to.equal('pt-BR/helloworld.html');
+      expect(files[2].path).to.equal('fr_FR/helloworld.html');
+      expect(files[3].path).to.equal('pt-BR/helloworld.html');
       done();
     });
   });
@@ -206,5 +221,40 @@ describe('gulp-international', () => {
     } catch (e) {
       expect(e).to.be.an('Error');
     }
+  });
+
+
+  it('should be able to process a larger file with multiple replacements', done => {
+    var content = `
+<html>
+<body>
+  <h1>R.section1.token2</h1>
+  <img src="img/mascot.png" alt="Our funny mascot" />
+  <div class="welcome">R.token1</div>
+  <hr />
+  <p>R.section1.subsection2.token3</p>
+</body>
+</html>
+`;
+    var options = {
+      locales: 'test/locales',
+      whitelist: 'en_US'
+    };
+    helper(options, content, files => {
+      expect(files.length).to.equal(1);
+      expect(files[0].contents.toString('utf8')).to.equal(`
+<html>
+<body>
+  <h1>content2</h1>
+  <img src="img/mascot.png" alt="Our funny mascot" />
+  <div class="welcome">content1</div>
+  <hr />
+  <p>content3</p>
+</body>
+</html>
+`);
+      expect(files[0].path).to.equal('test/helloworld-en_US.html');
+      done();
+    });
   });
 });

@@ -46,6 +46,10 @@ function load(options) {
         var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
         dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
         break;
+      case '.csv':
+        var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+        dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
+        break;
     }
   }
 
@@ -55,8 +59,24 @@ function load(options) {
 }
 
 /**
+ * Splits a line from an ini file into 2. Any subsequent '=' are ignored.
+ * @param line
+ * @returns {*[]}
+ */
+function splitIniLine(line) {
+  var separator = line.indexOf('=');
+  if (separator == -1) {
+    return [line];
+  }
+  return [
+    line.substr(0, separator),
+    line.substr(separator + 1)
+  ]
+}
+
+/**
  * Simple conversion helper to get a json file from an ini file.
- * @param iniData
+ * @param {string} iniData
  * @returns {{}}
  */
 function ini2json(iniData) {
@@ -64,7 +84,7 @@ function ini2json(iniData) {
   var iniLines = iniData.toString().split('\n');
   var context = null;
   for (var i in iniLines) {
-    var fields = iniLines[i].split('=');
+    var fields = splitIniLine(iniLines[i]);
     for (var j in fields) {
       fields[j] = fields[j].trim();
     }
@@ -81,6 +101,63 @@ function ini2json(iniData) {
           result[fields[0]] = fields[1];
         }
       }
+    }
+  }
+  return result;
+}
+
+/**
+ * Converts a line of a CSV file to an array of strings, omitting empty fields.
+ * @param line
+ */
+function splitCsvLine(line) {
+  if (!line.trim().length) {
+    return [];
+  }
+  var fields = [];
+  var inQuotes = false;
+  var separator = 0;
+  for (var i = 0; i < line.length; i++) {
+    switch(line[i]) {
+      case "\"":
+        if (i>0 && line[i-1] != "\\") {
+          inQuotes = !inQuotes;
+        }
+        break;
+      case ",":
+        if (!inQuotes) {
+          if (separator < i) {
+            var field = line.substring(separator, i).trim();
+            if (field.length) {
+              fields.push(field);
+            }
+          }
+          separator = i + 1;
+        }
+        break;
+    }
+  }
+  fields.push(line.substring(separator).trim());
+  return fields;
+}
+
+/**
+ * Simple conversion helper to get a json file from a csv file.
+ * @param {string} csvData
+ */
+function csv2json(csvData) {
+  var result = {};
+  var csvLines = csvData.toString().split('\n');
+  for (var i in csvLines) {
+    var fields = splitCsvLine(csvLines[i]);
+    if (fields.length) {
+      var key = '';
+      for (var k = 0; k < fields.length - 1; k++) {
+        if (fields[k].length) {
+          key += '.' + fields[k];
+        }
+      }
+      result[key.substr(1)] = fields[fields.length - 1];
     }
   }
   return result;
@@ -127,7 +204,7 @@ function translate(options, contents, copied) {
       processed[lang] += contents.substring(copied, i);
       processed[lang] += dictionaries[lang][key];
       processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
-      copied = next + 1;
+      copied = next;
     }
 
     i = next;

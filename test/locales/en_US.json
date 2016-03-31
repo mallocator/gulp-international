@@ -1,6 +1,9 @@
 {
   "token1": "content1",
   "section1": {
-    "token2": "content2"
+    "token2": "content2",
+    "subsection2": {
+      "token3": "content3"
+    }
   }
 }
