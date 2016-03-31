@@ -15,9 +15,6 @@ var through = require('through2');
  */
 var dictionaries = {};
 
-
-var locations = [];
-
 /**
  * Defauls options that are used if they are not overwritten by the user.
  * @type {Object}
@@ -37,10 +34,6 @@ var defaults = {
  * @param options
  */
 function load(options) {
-  if (locations[options.locales]) {
-    return;
-  }
-  locations[options.locales] = true;
   var files = fs.readdirSync(options.locales);
   for (var i in files) {
     var file = files[i];
@@ -201,6 +194,9 @@ module.exports = function (options) {
   options = _.assign({}, defaults, options);
   load(options);
 
+  module.exports.options = options;
+  module.exports.dictionaries = dictionaries;
+
   return through.obj(function (file, enc, cb) {
     if (file.isNull()) {
       cb(null, file);
@@ -211,8 +207,6 @@ module.exports = function (options) {
       cb(new gutil.PluginError('gulp-international', 'Streaming not supported'));
       return;
     }
-
-    this.options = options;
 
     try {
       var files = replace(file, options);
