@@ -1,10 +1,13 @@
 'use strict';
 
+var fs = require('fs');
+
 var _ = require('lodash');
 var expect = require('chai').expect;
 var File = require('vinyl');
 
-var plugin = require('..');
+var plugin = require('../');
+
 
 /**
  * Performs common tasks that need to be run for every test. Makes setting up and understanding tests way easier.
@@ -31,7 +34,7 @@ function helper() {
     files.push(file);
   });
   stream.on('finish', () => {
-    validatorCb(files, stream.options)
+    validatorCb(files, stream.options);
   });
   stream.write(new File({
     path: 'test/helloworld.html',
@@ -176,7 +179,18 @@ describe('gulp-international', () => {
 
 
   it('should throw an error if a file is a stream', () => {
-
+    var stream = plugin();
+    try {
+      stream.write(new File({
+        path: 'test/helloworld.html',
+        cwd: 'test/',
+        base: 'test/',
+        contents: new fs.createReadStream('locales/de_DE.ini')
+      }));
+      expect.fail();
+    } catch (e) {
+      expect(e.message).to.equal('Streaming not supported');
+    }
   });
 
 

@@ -187,39 +187,42 @@ function replace(file, options) {
 /**
  * Returns a stream object that gulp can understand and pipe to.
  * @param options
+ * @returns {WritableStream}
  */
 module.exports = function (options) {
-  if (options.whitelist && !_.isArray(options.whitelist)) {
-    options.whitelist = [options.whitelist];
-  }
-  if (options.blacklist && !_.isArray(options.blacklist)) {
-    options.blacklist = [options.blacklist];
+  if (options) {
+    if (options.whitelist && !_.isArray(options.whitelist)) {
+      options.whitelist = [options.whitelist];
+    }
+    if (options.blacklist && !_.isArray(options.blacklist)) {
+      options.blacklist = [options.blacklist];
+    }
   }
   options = _.assign({}, defaults, options);
   load(options);
 
-	return through.obj(function (file, enc, cb) {
-		if (file.isNull()) {
-			cb(null, file);
-			return;
-		}
+  return through.obj(function (file, enc, cb) {
+    if (file.isNull()) {
+      cb(null, file);
+      return;
+    }
 
-		if (file.isStream()) {
-			cb(new gutil.PluginError('gulp-international', 'Streaming not supported'));
-			return;
-		}
+    if (file.isStream()) {
+      cb(new gutil.PluginError('gulp-international', 'Streaming not supported'));
+      return;
+    }
 
     this.options = options;
 
-		try {
-			var files = replace(file, options);
+    try {
+      var files = replace(file, options);
       for (var i in files) {
         this.push(files[i]);
       }
-		} catch (err) {
-			this.emit('error', new gutil.PluginError('gulp-international', err));
-		}
+    } catch (err) {
+      this.emit('error', new gutil.PluginError('gulp-international', err));
+    }
 
-		cb();
-	});
+    cb();
+  });
 };
