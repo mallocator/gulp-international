@@ -238,10 +238,12 @@ describe('gulp-international', () => {
 `;
     var options = {
       locales: 'test/locales',
-      whitelist: 'en_US'
+      whitelist: ['en_US', 'pt-BR']
     };
     helper(options, content, files => {
-      expect(files.length).to.equal(1);
+      expect(files.length).to.equal(2);
+
+      expect(files[0].path).to.equal('test/helloworld-en_US.html');
       expect(files[0].contents.toString('utf8')).to.equal(`
 <html>
 <body>
@@ -253,7 +255,19 @@ describe('gulp-international', () => {
 </body>
 </html>
 `);
-      expect(files[0].path).to.equal('test/helloworld-en_US.html');
+
+      expect(files[1].path).to.equal('test/helloworld-pt-BR.html');
+      expect(files[1].contents.toString('utf8')).to.equal(`
+<html>
+<body>
+  <h1>conteúdo2</h1>
+  <img src="img/mascot.png" alt="Our funny mascot" />
+  <div class="welcome">conteúdo1</div>
+  <hr />
+  <p>conteúdo3</p>
+</body>
+</html>
+`);
       done();
     });
   });

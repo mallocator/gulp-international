@@ -3,7 +3,7 @@ module.exports = {
   section1: {
     token2: 'conteúdo2',
     subsection2: {
-      token3: 'content'
+      token3: 'conteúdo3'
     }
   }
 };
