@@ -9,6 +9,14 @@ This is a plugin for gulp that allows you to replace your custom placeholders fo
 There are already a few plugins for i18n out there, but none of them seem to work properly. Rather than dig in their code I wanted
 to use this opportunity to learn how to write plugins for gulp.  
 
+Features (cause we all love features):
+ 
+ * Custom token formats
+ * Custom language descriptors
+ * Custom filename format
+ * Custom translation source directory
+ * Read from .json, .js or .ini file 
+ 
 
 ## Install
 
@@ -31,14 +39,31 @@ gulp.task('default', function () {
 ```
 
 
-## API
+## Options
 
-### international(options)
+### locales
 
-#### options
+Type: string (path)
+Default: ```./locales```
 
-###### delimiter
+This tells the script where to look for translation file. Currently supported are .json, .js and .ini files. Each format supports
+nested keys (.ini only 1 level via sections). The name of the file is used for generating the output file. A source file with name
+```index.html``` with a translation file called ```en_US.json``` would result in an output file called ```index-en_US.html```.  
+You don't have to use this format. Basically any name is valid for the file and will be used later on.
 
+
+### filename
+
+Type: string
+Default: ```${path}/${name}-${lang}.${ext}```
+
+This options allows a user to configure the output format as desired. The default will generate all files in the same directory
+with the language suffix. A configuration to store each version in it's own path would be: ```${path}/${lang}/${name}.${ext}```
+
+
+### delimiter
+
+Type: Object
 Default:  
 ```
 {
@@ -66,3 +91,20 @@ would be
 ```
 
 This configuration would match any tokens formatted like this: ```<div>${title}</div>```.
+
+
+### whitelist
+
+Type: Array(string)
+Default: ```undefined```
+
+This option allows to limit the number of translations that can be used. The names that are whitelisted need to match the filename 
+(without the extension). Any other files will still be loaded into the list of available dictionaries, but no files will be
+generated. The option is ignored if it is missing.
+
+### blacklist
+
+Type: Array(string)
+Default: ```undefined```
+
+The opposite of the whitelist. Any language specified here will be ignored during processing. 
