@@ -162,5 +162,33 @@ describe('gulp-international', () => {
       expect(files[2].path).to.equal('pt-BR/helloworld.html');
       done();
     });
-  })
+  });
+
+
+  it('should throw an error if a file is null', () => {
+    try {
+      plugin().write(null);
+      expect.fail();
+    } catch (e) {
+      expect(e).to.be.an('Error');
+    }
+  });
+
+
+  it('should throw an error if a file is a stream', () => {
+
+  });
+
+
+  it('should throw an error if no dictionaries have been found', () => {
+    var options = {
+      locales: 'test/notlocales'
+    };
+    try {
+      helper(options, files => {});
+      expect.fail();
+    } catch (e) {
+      expect(e).to.be.an('Error');
+    }
+  });
 });

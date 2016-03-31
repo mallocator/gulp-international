@@ -15,6 +15,9 @@ var through = require('through2');
  */
 var dictionaries = {};
 
+
+var locations = [];
+
 /**
  * Defauls options that are used if they are not overwritten by the user.
  * @type {Object}
@@ -34,9 +37,10 @@ var defaults = {
  * @param options
  */
 function load(options) {
-  if (Object.keys(dictionaries).length) {
+  if (locations[options.locales]) {
     return;
   }
+  locations[options.locales] = true;
   var files = fs.readdirSync(options.locales);
   for (var i in files) {
     var file = files[i];
@@ -104,6 +108,9 @@ function translate(options, contents, copied) {
         processed[lang] = '';
       }
     }
+  }
+  if (!Object.keys(processed).length) {
+    throw new Error('No translation dictionaries available to create any files!');
   }
   var i = contents.indexOf(options.delimiter.prefix);
   while ((i !== -1)) {
