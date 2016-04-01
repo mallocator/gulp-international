@@ -29,7 +29,7 @@ var defaults = {
   locales: './locales',
   delimiter: {
     prefix: 'R.',
-    stopCondition: /[\-;,<>\{}()\[\]"'\s$]/
+    stopCondition: /[\-;,<>\{}()\[\]"'\s&$]/
   },
   filename: '${path}/${name}-${lang}.${ext}',
   blacklist: [],
