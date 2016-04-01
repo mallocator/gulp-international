@@ -29,7 +29,7 @@ var defaults = {
   locales: './locales',
   delimiter: {
     prefix: 'R.',
-    stopCondition: /[\-;,<>\{}()\[\]"'\s&$]/
+    stopCondition: /[^\.\w]/
   },
   filename: '${path}/${name}-${lang}.${ext}',
   blacklist: [],
@@ -203,16 +203,17 @@ function translate(options, contents, copied) {
   var i = contents.indexOf(options.delimiter.prefix);
   while ((i !== -1)) {
     var endMatch, length, token, key;
+    var tail = contents.substr(i);
     if (options.delimiter.suffix) {
-      endMatch = contents.substr(i).match(options.delimiter.suffix);
+      endMatch = tail.match(options.delimiter.suffix);
       length = endMatch.index + endMatch[0].length;
-      token = contents.substr(i, length);
+      token = tail.substr(0, length);
       key = token.substr(options.delimiter.prefix.length, token.length - options.delimiter.prefix.length - options.delimiter.suffix.length);
     }
     else if (options.delimiter.stopCondition) {
-      endMatch = contents.substr(i).match(options.delimiter.stopCondition);
-      length = endMatch.index + endMatch[0].length - 1;
-      token = contents.substr(i, length);
+      endMatch = tail.match(options.delimiter.stopCondition);
+      length = endMatch == null ? tail.length : length = endMatch.index + endMatch[0].length - 1;
+      token = tail.substr(0, length);
       key = token.substr(options.delimiter.prefix.length);
     }
 
