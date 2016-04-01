@@ -87,7 +87,7 @@ Default:
 ```
 {
   prefix: 'R.',
-  stopCondition: /[^\.\w]/
+  stopCondition: /[^\.\w_\-]/
 }
 ```
 
