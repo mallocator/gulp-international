@@ -34,7 +34,10 @@ var defaults = {
   filename: '${path}/${name}-${lang}.${ext}',
   blacklist: [],
   warn: true,
-  cache: true
+  cache: true,
+  ignoreErrors: false,
+  dryRun: false,
+  includeOriginal: false
 };
 
 /**
@@ -45,30 +48,31 @@ function load(options) {
   if (cache[options.locales]) {
     dictionaries = cache[options.locales];
   } else {
-    var files = fs.readdirSync(options.locales);
-    for (var i in files) {
-      var file = files[i];
-      switch (path.extname(file)) {
-        case '.json':
-        case '.js':
-          dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
-          break;
-        case '.ini':
-          var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-          dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
-          break;
-        case '.csv':
-          var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-          dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
-          break;
+    try {
+      var files = fs.readdirSync(options.locales);
+      for (var i in files) {
+        var file = files[i];
+        switch (path.extname(file)) {
+          case '.json':
+          case '.js':
+            dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
+            break;
+          case '.ini':
+            var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+            dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
+            break;
+          case '.csv':
+            var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+            dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
+            break;
+        }
       }
       if (options.cache) {
         cache[options.locales] = dictionaries;
       }
+    } catch (e) {
+      throw new Error('No translation dictionaries have been found!');
     }
-  }
-  if (!Object.keys(dictionaries).length) {
-    throw new Error('No translation dictionaries have been found!');
   }
 }
 
@@ -305,11 +309,20 @@ module.exports = function (options) {
 
     try {
       var files = replace(file, options);
-      for (var i in files) {
-        this.push(files[i]);
+      if (options.dryRun) {
+        this.push(file);
+      } else {
+        if (options.includeOriginal) {
+          this.push(file);
+        }
+        for (var i in files) {
+          this.push(files[i]);
+        }
       }
     } catch (err) {
-      this.emit('error', new gutil.PluginError('gulp-international', err));
+      if (!options.ignoreErrors) {
+        this.emit('error', new gutil.PluginError('gulp-international', err));
+      }
     }
 
     cb();
