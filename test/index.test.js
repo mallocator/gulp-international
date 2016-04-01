@@ -130,7 +130,9 @@ describe('gulp-international', () => {
       var content = '<html><body><h1>R.nonExistentToken</h1></body></html>';
       var options = { locales: 'test/locales' };
 
-      gently.expect(gutil, 'log', 4);
+      gently.expect(gutil, 'log', 4, function() {
+        expect(arguments[3]).to.equal('nonExistentToken');
+      });
 
       helper(options, content, () => {
         gently.verify();

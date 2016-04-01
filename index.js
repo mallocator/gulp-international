@@ -29,7 +29,7 @@ var defaults = {
   locales: './locales',
   delimiter: {
     prefix: 'R.',
-    stopCondition: /[^\.\w]/
+    stopCondition: /[^\.\w_\-]/
   },
   filename: '${path}/${name}-${lang}.${ext}',
   blacklist: [],
@@ -42,7 +42,7 @@ var defaults = {
 
 /**
  * Loads the dictionaries from the locale directory.
- * @param options
+ * @param {Object} options
  */
 function load(options) {
   if (cache[options.locales]) {
@@ -78,8 +78,8 @@ function load(options) {
 
 /**
  * Splits a line from an ini file into 2. Any subsequent '=' are ignored.
- * @param line
- * @returns {*[]}
+ * @param {string} line
+ * @returns {string[]}
  */
 function splitIniLine(line) {
   var separator = line.indexOf('=');
@@ -126,7 +126,8 @@ function ini2json(iniData) {
 
 /**
  * Converts a line of a CSV file to an array of strings, omitting empty fields.
- * @param line
+ * @param {string} line
+ * @returns {string[]}
  */
 function splitCsvLine(line) {
   if (!line.trim().length) {
@@ -162,6 +163,7 @@ function splitCsvLine(line) {
 /**
  * Simple conversion helper to get a json file from a csv file.
  * @param {string} csvData
+ * @returns {Object}
  */
 function csv2json(csvData) {
   var result = {};
@@ -183,12 +185,13 @@ function csv2json(csvData) {
 
 /**
  * Performs the actual translation from a tokenized source to the final content.
- * @param options
- * @param contents
- * @param copied
- * @returns {{}}
+ * @param {Object} options
+ * @param {string} contents
+ * @param {number} copied
+ * @param {string} filePath
+ * @returns {Object}
  */
-function translate(options, contents, copied) {
+function translate(options, contents, copied, filePath) {
   var processed = {};
   for (var lang in dictionaries) {
     if (!options.whitelist || options.whitelist.indexOf(lang) != -1) {
@@ -224,7 +227,7 @@ function translate(options, contents, copied) {
       if (dictionaries[lang][key]) {
         processed[lang] += dictionaries[lang][key];
       } else if(options.warn) {
-        gutil.log('Missing translation in language', lang, 'for key', key);
+        gutil.log('Missing translation of language', lang, 'for key', key, 'in file', filePath);
       }
       processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
     }
@@ -242,15 +245,15 @@ function translate(options, contents, copied) {
 
 /**
  * Performs the actual replacing of tokens with translations.
- * @param file
- * @param options
- * @returns {*}
+ * @param {File} file
+ * @param {Object} options
+ * @returns {File[]}
  */
 function replace(file, options) {
   var contents = file.contents.toString('utf8');
   var copied = 0;
 
-  var processed = translate(options, contents, copied);
+  var processed = translate(options, contents, copied, file.path);
 
   var files = [];
   for (var lang in processed) {
@@ -280,7 +283,7 @@ function replace(file, options) {
 /**
  * Returns a stream object that gulp can understand and pipe to.
  * @param options
- * @returns {WritableStream}
+ * @returns {Stream}
  */
 module.exports = function (options) {
   if (options) {
