@@ -303,8 +303,7 @@ module.exports = function (options) {
     }
 
     if (file.isStream()) {
-      cb(new gutil.PluginError('gulp-international', 'Streaming not supported'));
-      return;
+      return cb(new gutil.PluginError('gulp-international', 'Streaming not supported'));
     }
 
     try {

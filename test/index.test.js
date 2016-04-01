@@ -5,6 +5,8 @@ var fs = require('fs');
 var _ = require('lodash');
 var expect = require('chai').expect;
 var File = require('vinyl');
+var gently = new (require('gently'));
+var gutil = require('gulp-util');
 
 var plugin = require('../');
 
@@ -110,6 +112,7 @@ describe('gulp-international', () => {
       });
     });
 
+
     it ('should include the original file as well as all translations', done => {
       var options = { locales: 'test/locales', includeOriginal: true };
       helper(options, files => {
@@ -118,6 +121,19 @@ describe('gulp-international', () => {
         expect(files[0].path).to.equal('test/helloworld.html');
         expect(files[1].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
         expect(files[1].path).to.equal('test/helloworld-de_DE.html');
+        done();
+      });
+    });
+
+
+    it('should log a warning for a missing translation key', done => {
+      var content = '<html><body><h1>R.nonExistentToken</h1></body></html>';
+      var options = { locales: 'test/locales' };
+
+      gently.expect(gutil, 'log', 4);
+
+      helper(options, content, () => {
+        gently.verify();
         done();
       });
     });
@@ -146,17 +162,6 @@ describe('gulp-international', () => {
         expect(files[0].path).to.equal('test/helloworld-de_DE.html');
         done();
       });
-    });
-
-
-    it('should throw an error if a file is null', () => {
-      try {
-        plugin().write(null);
-        expect.fail();
-      } catch (e) {
-        expect(e).to.be.an('Error');
-        expect(e.message).to.equal('No translation dictionaries have been found!');
-      }
     });
 
 
@@ -220,9 +225,13 @@ describe('gulp-international', () => {
     });
 
 
-    it('shouldn just continue if the passed in file is null', () => {
-      var stream = plugin({ locales: 'test/locales'});
-      stream.write(null);
+    it('should just continue if the passed in file is null', () => {
+      plugin({ locales: 'test/locales'}).write(null);
+    });
+
+
+    it('should just continue if the file content is null', () => {
+      plugin({locales: 'test/locales'}).write(new File());
     });
 
 
