@@ -141,6 +141,23 @@ describe('gulp-international', () => {
 
   describe('Error cases', () => {
 
+    it('should work with A number of delimiters', done => {
+      var stopSignals = "\"'{}[]|~`:;,/!@#$%^&*()=+<>`";
+      var options = { locales: 'test/locales', whitelist: 'en_US' };
+      var processed = 0;
+      for (let i = 0; i < stopSignals.length; i++) {
+        var content = stopSignals[i] + "R.token1" + stopSignals[i];
+        helper(options, content, files => {
+          expect(files[0].contents.toString('utf8')).to.equal(stopSignals[i] + "content1" + stopSignals[i]);
+          processed++;
+          if (processed == stopSignals.length) {
+            done();
+          }
+        });
+      }
+    });
+
+
     it('should leave files without tokens unprocessed', done => {
       var content = '<html><body>Not replaced</body></html>';
       var options = { locales: 'test/locales' };
@@ -246,6 +263,18 @@ describe('gulp-international', () => {
       } catch(e) {
         expect.fail('No Error should have been thrown.');
       }
+    });
+
+
+    it('should be fast', done => {
+      var content = fs.readFileSync('test/locales/lorem.ipsum').toString('utf8');
+      var options = { locales: 'test/locales', whitelist: 'en_US' };
+      var start = process.hrtime();
+      helper(options, content, () => {
+        var end = process.hrtime(start);
+        expect(end[0] * 1e3 + end[1] * 1e-6).to.be.lt(25);
+        done();
+      });
     });
 
 

@@ -87,7 +87,7 @@ Default:
 ```
 {
   prefix: 'R.',
-  stopCondition: /[\-;,\.<>\{}()\[\]"'\s$]/
+  stopCondition: /[^\.\w]/
 }
 ```
 
@@ -209,7 +209,7 @@ Similar to JSON you can just use node.js module and export your json:
 module.exports = {
   token1: 'translation1',
   section1: {
-    token2: 'translation2',
+    token2: 'translation2', // This format also allows comments
     subsection1: {
       token3: 'translation3'
     }
@@ -217,7 +217,7 @@ module.exports = {
 }
 ```
 
-The tokens map the same way as a JSON file would. 
+The tokens map the same way as a JSON file would. If you don't know which format to choose I would choose this one. 
 
 
 ### CSV
