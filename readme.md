@@ -68,7 +68,7 @@ Default:
 ```
 {
   prefix: 'R.',
-  stopCondition: /[;,\.<>\{}()\[\]"'\s$]/
+  stopCondition: /[\-;,\.<>\{}()\[\]"'\s$]/
 }
 ```
 
@@ -116,6 +116,15 @@ Type: boolean
 Default: ```true```
 
 This enables warning to be printed out if any tokens are missing.
+
+
+### cache
+
+Type: boolean  
+Default: ```true```
+
+This enables caching of dictionaries, so that reruns of the plugin will not have to read in the translation tokens again. Depending
+on your configuration you might want to disable caching based on how your livereloads are configured.
 
 
 ## Feature Ideas for the future

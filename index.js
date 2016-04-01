@@ -16,6 +16,12 @@ var through = require('through2');
 var dictionaries = {};
 
 /**
+ * A cache for previously loaded dictionaries so we don't have to load them again
+ * @type {Array}
+ */
+var cache = [];
+
+/**
  * Defauls options that are used if they are not overwritten by the user.
  * @type {Object}
  */
@@ -23,11 +29,12 @@ var defaults = {
   locales: './locales',
   delimiter: {
     prefix: 'R.',
-    stopCondition: /[;,<>\{}()\[\]"'\s$]/
+    stopCondition: /[\-;,<>\{}()\[\]"'\s$]/
   },
   filename: '${path}/${name}-${lang}.${ext}',
   blacklist: [],
-  warn: true
+  warn: true,
+  cache: true
 };
 
 /**
@@ -35,25 +42,31 @@ var defaults = {
  * @param options
  */
 function load(options) {
-  var files = fs.readdirSync(options.locales);
-  for (var i in files) {
-    var file = files[i];
-    switch(path.extname(file)) {
-      case '.json':
-      case '.js':
-        dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
-        break;
-      case '.ini':
-        var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-        dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
-        break;
-      case '.csv':
-        var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-        dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
-        break;
+  if (cache[options.locales]) {
+    dictionaries = cache[options.locales];
+  } else {
+    var files = fs.readdirSync(options.locales);
+    for (var i in files) {
+      var file = files[i];
+      switch (path.extname(file)) {
+        case '.json':
+        case '.js':
+          dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
+          break;
+        case '.ini':
+          var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+          dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
+          break;
+        case '.csv':
+          var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+          dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
+          break;
+      }
+      if (options.cache) {
+        cache[options.locales] = dictionaries;
+      }
     }
   }
-
   if (!Object.keys(dictionaries).length) {
     throw new Error('No translation dictionaries have been found!');
   }
