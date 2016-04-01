@@ -43,7 +43,7 @@ gulp.task('default', function () {
 
 ### locales
 
-Type: string (path)
+Type: string (path)  
 Default: ```./locales```
 
 This tells the script where to look for translation file. Currently supported are .json, .js and .ini files. Each format supports
@@ -54,7 +54,7 @@ You don't have to use this format. Basically any name is valid for the file and 
 
 ### filename
 
-Type: string
+Type: string  
 Default: ```${path}/${name}-${lang}.${ext}```
 
 This options allows a user to configure the output format as desired. The default will generate all files in the same directory
@@ -63,7 +63,7 @@ with the language suffix. A configuration to store each version in it's own path
 
 ### delimiter
 
-Type: Object
+Type: Object  
 Default:  
 ```
 {
@@ -95,7 +95,7 @@ This configuration would match any tokens formatted like this: ```<div>${title}<
 
 ### whitelist
 
-Type: Array(string)
+Type: Array(string)  
 Default: ```undefined```
 
 This option allows to limit the number of translations that can be used. The names that are whitelisted need to match the filename 
@@ -104,7 +104,7 @@ generated. The option is ignored if it is missing.
 
 ### blacklist
 
-Type: Array(string)
+Type: Array(string)  
 Default: ```undefined```
 
 The opposite of the whitelist. Any language specified here will be ignored during processing.
@@ -112,7 +112,17 @@ The opposite of the whitelist. Any language specified here will be ignored durin
 
 ### warn
 
-Type: boolean
+Type: boolean  
 Default: ```true```
 
 This enables warning to be printed out if any tokens are missing.
+
+
+## Feature Ideas for the future
+
+Maybe I'll implement these one day, maybe not.
+
+ * Replace links to standard versions with internationalized versions (can probably also just be done with using tokens for imports)
+ * Extract non code strings from source and list them as still missing translations
+ * Warn about unused translation strings
+ * Make translations available as environment variables in jade/js/coffeescript/etc.

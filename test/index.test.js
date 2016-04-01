@@ -171,13 +171,13 @@ describe('gulp-international', () => {
   it('should support a custom filename format', done => {
     var options = {
       locales: 'test/locales',
-      filename: '${lang}/${name}.${ext}'
+      filename: '${path}/${lang}/${name}.${ext}'
     };
     helper(options, files => {
-      expect(files[0].path).to.equal('de_DE/helloworld.html');
-      expect(files[1].path).to.equal('en_US/helloworld.html');
-      expect(files[2].path).to.equal('fr_FR/helloworld.html');
-      expect(files[3].path).to.equal('pt-BR/helloworld.html');
+      expect(files[0].path).to.equal('test/de_DE/helloworld.html');
+      expect(files[1].path).to.equal('test/en_US/helloworld.html');
+      expect(files[2].path).to.equal('test/fr_FR/helloworld.html');
+      expect(files[3].path).to.equal('test/pt-BR/helloworld.html');
       done();
     });
   });
@@ -221,6 +221,21 @@ describe('gulp-international', () => {
     } catch (e) {
       expect(e).to.be.an('Error');
     }
+  });
+
+
+  it('should work on source files that have no tokens', done => {
+    var content = '<html><body><h1>notatoken</h1></body></html>';
+    var options = {
+      locales: 'test/locales',
+      whitelist: 'en_US'
+    };
+    helper(options, content, files => {
+      expect(files.length).to.equal(1);
+      expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>notatoken</h1></body></html>');
+      expect(files[0].path).to.equal('test/helloworld-en_US.html');
+      done();
+    });
   });
 
 

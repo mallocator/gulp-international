@@ -248,7 +248,7 @@ function replace(file, options) {
     }
 
     var newFile = new gutil.File({
-      base: path.dirname(filePath) + '/',
+      base: file.base,
       cwd: file.cwd,
       path: filePath,
       contents: new Buffer(processed[lang], 'utf8')
