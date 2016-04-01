@@ -9,42 +9,6 @@ var File = require('vinyl');
 var plugin = require('../');
 
 
-/**
- * Performs common tasks that need to be run for every test. Makes setting up and understanding tests way easier.
- */
-function helper() {
-  var options = {};
-  var content = '<html><body><h1>R.token1</h1></body></html>';
-  var validatorCb;
-  for(let param of arguments) {
-    if (_.isString(param)) {
-      content = param
-    } else if (_.isFunction(param)) {
-      validatorCb = param;
-    } else if (_.isObject(param)) {
-      options = param;
-    }
-  }
-  expect(validatorCb).to.be.a('function');
-  expect(content).to.be.a('string');
-
-  var stream = plugin(options);
-  var files = [];
-  stream.on('data', file => {
-    files.push(file);
-  });
-  stream.on('finish', () => {
-    validatorCb(files, plugin.options);
-  });
-  stream.write(new File({
-    path: 'test/helloworld.html',
-    cwd: 'test/',
-    base: 'test/',
-    contents: new Buffer(content, 'utf8')
-  }));
-  stream.end();
-}
-
 describe('gulp-international', () => {
 
   describe('Usage Examples', () => {
@@ -134,6 +98,29 @@ describe('gulp-international', () => {
         done();
       });
     });
+
+
+    it('should pass on the original file if this is just a dry run', done => {
+      var options = { locales: 'test/locales', dryRun: true };
+      helper(options, files => {
+        expect(files.length).to.equal(1);
+        expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>R.token1</h1></body></html>');
+        expect(files[0].path).to.equal('test/helloworld.html');
+        done();
+      });
+    });
+
+    it ('should include the original file as well as all translations', done => {
+      var options = { locales: 'test/locales', includeOriginal: true };
+      helper(options, files => {
+        expect(files.length).to.equal(5);
+        expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>R.token1</h1></body></html>');
+        expect(files[0].path).to.equal('test/helloworld.html');
+        expect(files[1].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
+        expect(files[1].path).to.equal('test/helloworld-de_DE.html');
+        done();
+      });
+    });
   });
 
   describe('Error cases', () => {
@@ -168,12 +155,12 @@ describe('gulp-international', () => {
         expect.fail();
       } catch (e) {
         expect(e).to.be.an('Error');
-        expect(e.code).to.equal('ENOENT');
+        expect(e.message).to.equal('No translation dictionaries have been found!');
       }
     });
 
 
-    it('should throw an error if a file is a stream', () => {
+    it('should throw an error if a file is a stream', done => {
       var stream = plugin({ locales: 'test/locales' });
       try {
         stream.write(new File({
@@ -185,20 +172,35 @@ describe('gulp-international', () => {
         expect.fail();
       } catch (e) {
         expect(e.message).to.equal('Streaming not supported');
+        done();
       }
     });
 
 
-    it('should throw an error if no dictionaries have been found', () => {
+    it('should throw an error if no dictionaries have been found', done => {
       var options = {
-        locales: 'test/notlocales'
+        locales: 'test/notlocales',
+        cache: false
       };
       try {
         helper(options, files => {});
         expect.fail();
       } catch (e) {
-        expect(e).to.be.an('Error');
-        expect(e.code).to.equal('ENOENT');
+        expect(e.message).to.equal('No translation dictionaries have been found!');
+        done();
+      }
+    });
+
+
+    it('should throw an error if no existing dictionaries have been whitelisted', () => {
+      var options = {
+        locales: 'test/locales',
+        whitelist: 'es_ES'
+      };
+      try{
+        helper(options, files => {});
+      } catch(e) {
+        expect(e.message).to.equal('No translation dictionaries available to create any files!');
       }
     });
 
@@ -215,6 +217,26 @@ describe('gulp-international', () => {
         expect(files[0].path).to.equal('test/helloworld-en_US.html');
         done();
       });
+    });
+
+
+    it('shouldn just continue if the passed in file is null', () => {
+      var stream = plugin({ locales: 'test/locales'});
+      stream.write(null);
+    });
+
+
+    it('should ignore errors if ignoreErrors is set', () => {
+      var options = {
+        locales: 'test/locales',
+        whitelist: 'es_ES',
+        ignoreErrors: true
+      };
+      try{
+        helper(options, files => {});
+      } catch(e) {
+        expect.fail('No Error should have been thrown.');
+      }
     });
 
 
@@ -320,3 +342,39 @@ describe('gulp-international', () => {
     });
   });
 });
+
+/**
+ * Performs common tasks that need to be run for every test. Makes setting up and understanding tests way easier.
+ */
+function helper() {
+  var options = {};
+  var content = '<html><body><h1>R.token1</h1></body></html>';
+  var validatorCb;
+  for(let param of arguments) {
+    if (_.isString(param)) {
+      content = param
+    } else if (_.isFunction(param)) {
+      validatorCb = param;
+    } else if (_.isObject(param)) {
+      options = param;
+    }
+  }
+  expect(validatorCb).to.be.a('function');
+  expect(content).to.be.a('string');
+
+  var stream = plugin(options);
+  var files = [];
+  stream.on('data', file => {
+    files.push(file);
+  });
+  stream.on('finish', () => {
+    validatorCb(files, plugin.options);
+  });
+  stream.write(new File({
+    path: 'test/helloworld.html',
+    cwd: 'test/',
+    base: 'test/',
+    contents: new Buffer(content, 'utf8')
+  }));
+  stream.end();
+}

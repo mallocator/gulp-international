@@ -18,11 +18,13 @@ Features (cause we all love features):
  * Read from .json, .js, .ini or .csv file (for examples check the test folder)
  
 
+
 ## Install
 
 ```
 $ npm install --save-dev gulp-international
 ```
+
 
 
 ## Usage
@@ -38,8 +40,25 @@ gulp.task('default', function () {
 });
 ```
 
+Or with your custom options of the out of box config dones't work:
+
+```js
+var gulp = require('gulp');
+var international = require('gulp-international');
+
+gulp.task('default', function () {
+	return gulp.src('src/file.ext')
+		.pipe(international({
+		  whitelist: ['en_US']
+		}))
+		.pipe(gulp.dest('dist'));
+});
+```
+
+
 
 ## Options
+
 
 ### locales
 
@@ -102,6 +121,7 @@ This option allows to limit the number of translations that can be used. The nam
 (without the extension). Any other files will still be loaded into the list of available dictionaries, but no files will be
 generated. The option is ignored if it is missing.
 
+
 ### blacklist
 
 Type: Array(string)  
@@ -127,6 +147,118 @@ This enables caching of dictionaries, so that reruns of the plugin will not have
 on your configuration you might want to disable caching based on how your livereloads are configured.
 
 
+### ignoreErrors
+
+Type: boolean  
+Default: ```false```
+
+Allows to disable throwing of any errors that might occur so that the pipe will continue executing.
+
+
+### dryRun
+
+Type: boolean  
+Default: ```false```
+
+When set to true the plugin will perform all operations for a translation, but will pass on the original file along the pipe instead
+of the newly generated ones.
+
+
+### includeOriginal
+
+Type: boolean  
+Default: ```false```
+
+When set to true the original file is passed along the pipe as well along with all translated files.
+
+
+
+## Translation Files
+
+A number of formats are supported from where we can read translations:
+
+
+### JSON
+
+```
+{
+  "token1": "translation1",
+  "section1": {
+    "token2": "translation2",
+    "subsection1": {
+      "token3": "translation3"
+    }
+  }
+}
+```
+
+This results in 3 tokens that look like this (With default delimiter settings):
+
+```
+R.token1 = translation1
+R.section1.token2 = translation2
+R.section1.subsection1.token3 = translation3
+```
+
+
+### JS
+
+Similar to JSON you can just use node.js module and export your json:
+
+```
+module.exports = {
+  token1: 'translation1',
+  section1: {
+    token2: 'translation2',
+    subsection1: {
+      token3: 'translation3'
+    }
+  }
+}
+```
+
+The tokens map the same way as a JSON file would. 
+
+
+### CSV
+
+In this format all except for the last readable field will make up  the token. The last field will be the translation.
+To get the same output as with the previous examples the file would look something like this:
+
+```
+token1,,,translation1
+token2,section1,,translation2
+token3,section1,subsection1,translation3
+```
+
+This library doesn't really check for a correct CSV format and also doesn't assume a header line. It just scans for fields
+that it can use to build it's keys. Another valid format to read translations would be this non standard csv file:
+
+```
+token1,translation1
+token2,section1,translation2
+token3,section1,subsection1,translation3
+```
+
+If you have fields with ```,``` in them you can escape them ```"```, which in turn can also be escaped using ```\"```.
+
+
+### INI
+
+The standard .ini format is supported as well, but only supports one level of nesting. You can simulate multiple levels though:
+
+```
+token1=translation1
+
+[section1]
+token2=translation2
+
+[section1.subsection1]
+token3=translation3
+```
+
+
+
 ## Feature Ideas for the future
 
 Maybe I'll implement these one day, maybe not.
@@ -134,4 +266,5 @@ Maybe I'll implement these one day, maybe not.
  * Replace links to standard versions with internationalized versions (can probably also just be done with using tokens for imports)
  * Extract non code strings from source and list them as still missing translations
  * Warn about unused translation strings
- * Make translations available as environment variables in jade/js/coffeescript/etc.
+ * Make translations available as environment variables in jade/js/coffeescript/etc. (although you can already replace strings anywhere)
+ * Support streams... although that seems like a pain to implement
