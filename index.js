@@ -219,12 +219,11 @@ function translate(options, contents, copied, filePath) {
       token = tail.substr(0, length);
       key = token.substr(options.delimiter.prefix.length);
     }
-
     var next = contents.indexOf(options.delimiter.prefix, i + length + 1);
 
     for (var lang in processed) {
       processed[lang] += contents.substring(copied, i);
-      if (dictionaries[lang][key]) {
+      if (dictionaries[lang][key] !== undefined) {
         processed[lang] += dictionaries[lang][key];
       } else if(options.warn) {
         gutil.log('Missing translation of language', lang, 'for key', key, 'in file', filePath);

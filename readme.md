@@ -259,6 +259,49 @@ token3=translation3
 
 
 
+## Tips and Tricks
+
+### Dynamic scripts based on language
+
+Sometimes you have dynamic scripts that you generate where you want to react differently based on the language that is being used. For 
+example let's say that you have a javascript file and need the language to be available from a variable. Simply set up the plugin to run
+before the script is being executed on the script itself and include a line such as ```var lang = 'R.lang'```. All you have to do to 
+make this working is have a key in your definition with the name "lang".
+
+
+### Placeholder formatting
+
+Again if you replace the string that is already there it is east to integrate with existing formatting functions. Run the plugin before 
+the script is being executed and you can make use of formatters such as sprintf, util.format, console.log and others. Since it's common
+to use gulp for browser projects here's a simple formatting function you can make use of (taken from 
+[StackOverflow](http://stackoverflow.com/questions/1038746/equivalent-of-string-format-in-jquery):
+ 
+```
+/**
+ * Add formating function to string objects.
+ * @returns {string}
+ */
+String.prototype.format = function () {
+    var args = arguments;
+    return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
+        if (m == "{{") { return "{"; }
+        if (m == "}}") { return "}"; }
+        return args[n];
+    });
+};
+```
+
+With a function like this you can create smarter translations such as:
+
+```
+token1={0} is {1}, isn't it?
+
+"R.token1".format('JS', 'awesome');
+
+=> "JS is awesome, isn't it?"
+```
+
+
 ## Feature Ideas for the future
 
 Maybe I'll implement these one day, maybe not.
