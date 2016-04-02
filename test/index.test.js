@@ -201,6 +201,23 @@ describe('gulp-international', () => {
     });
 
 
+    it('should not ignore translation values that are empty', done => {
+      var content = '<html><body><h1>R.emptyToken</h1></body></html>';
+      var options = {
+        locales: 'test/locales',
+        whitelist: 'en_US'
+      };
+      gently.expect(gutil, 'log', 1, function() {
+        expect.fail("Token shouldn't have been logged as missing");
+      });
+      helper(options, content , files => {
+        expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1></h1></body></html>');
+        try { gutil.log() } catch(e) {/* ignore gently cleanup */}
+        done();
+      });
+    });
+
+
     it('should throw an error if no dictionaries have been found', done => {
       var options = {
         locales: 'test/notlocales',
