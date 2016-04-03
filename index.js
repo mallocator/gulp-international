@@ -37,7 +37,8 @@ var defaults = {
   cache: true,
   ignoreErrors: false,
   dryRun: false,
-  includeOriginal: false
+  includeOriginal: false,
+  ignoreTokens: false
 };
 
 /**
@@ -204,35 +205,37 @@ function translate(options, contents, copied, filePath) {
     throw new Error('No translation dictionaries available to create any files!');
   }
   var i = contents.indexOf(options.delimiter.prefix);
-  while ((i !== -1)) {
-    var endMatch, length, token, key;
-    var tail = contents.substr(i);
-    if (options.delimiter.suffix) {
-      endMatch = tail.match(options.delimiter.suffix);
-      length = endMatch.index + endMatch[0].length;
-      token = tail.substr(0, length);
-      key = token.substr(options.delimiter.prefix.length, token.length - options.delimiter.prefix.length - options.delimiter.suffix.length);
-    }
-    else if (options.delimiter.stopCondition) {
-      endMatch = tail.match(options.delimiter.stopCondition);
-      length = endMatch == null ? tail.length : length = endMatch.index + endMatch[0].length - 1;
-      token = tail.substr(0, length);
-      key = token.substr(options.delimiter.prefix.length);
-    }
-    var next = contents.indexOf(options.delimiter.prefix, i + length + 1);
-
-    for (var lang in processed) {
-      processed[lang] += contents.substring(copied, i);
-      if (dictionaries[lang][key] !== undefined) {
-        processed[lang] += dictionaries[lang][key];
-      } else if(options.warn) {
-        gutil.log('Missing translation of language', lang, 'for key', key, 'in file', filePath);
+  if (!options.ignoreTokens) {
+    while ((i !== -1)) {
+      var endMatch, length, token, key;
+      var tail = contents.substr(i);
+      if (options.delimiter.suffix) {
+        endMatch = tail.match(options.delimiter.suffix);
+        length = endMatch.index + endMatch[0].length;
+        token = tail.substr(0, length);
+        key = token.substr(options.delimiter.prefix.length, token.length - options.delimiter.prefix.length - options.delimiter.suffix.length);
       }
-      processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
-    }
-    copied = next;
+      else if (options.delimiter.stopCondition) {
+        endMatch = tail.match(options.delimiter.stopCondition);
+        length = endMatch == null ? tail.length : length = endMatch.index + endMatch[0].length - 1;
+        token = tail.substr(0, length);
+        key = token.substr(options.delimiter.prefix.length);
+      }
+      var next = contents.indexOf(options.delimiter.prefix, i + length + 1);
 
-    i = next;
+      for (var lang in processed) {
+        processed[lang] += contents.substring(copied, i);
+        if (dictionaries[lang][key] !== undefined) {
+          processed[lang] += dictionaries[lang][key];
+        } else if (options.warn) {
+          gutil.log('Missing translation of language', lang, 'for key', key, 'in file', filePath);
+        }
+        processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
+      }
+      copied = next;
+
+      i = next;
+    }
   }
   for (var lang in processed) {
     if (!processed[lang].length) {
