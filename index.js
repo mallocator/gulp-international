@@ -205,7 +205,7 @@ function translate(options, contents, copied, filePath) {
     throw new Error('No translation dictionaries available to create any files!');
   }
   var i = contents.indexOf(options.delimiter.prefix);
-  if (options.ignoreTokens === false && !(options.ignoreTokens instanceof RegExp && options.ignoreTokens.test(filePath))) {
+  if (!(options.ignoreTokens === true || options.ignoreTokens instanceof RegExp && options.ignoreTokens.test(filePath))) {
     while ((i !== -1)) {
       var endMatch, length, token, key;
       var tail = contents.substr(i);
@@ -314,7 +314,7 @@ module.exports = function(options) {
 
     try {
       var files = replace(file, options);
-      if (options.dryRun) {
+      if (options.dryRun === true || options.dryRun instanceof RegExp && options.dryRun.test(file.path)) {
         this.push(file);
       } else {
         if (options.includeOriginal) {
