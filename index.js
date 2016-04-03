@@ -317,7 +317,7 @@ module.exports = function(options) {
       if (options.dryRun === true || options.dryRun instanceof RegExp && options.dryRun.test(file.path)) {
         this.push(file);
       } else {
-        if (options.includeOriginal) {
+        if (options.includeOriginal === true || options.includeOriginal instanceof RegExp && options.includeOriginal.test(file.path)) {
           this.push(file);
         }
         for (var i in files) {

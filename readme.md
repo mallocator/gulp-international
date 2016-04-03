@@ -111,23 +111,30 @@ would be
 
 This configuration would match any tokens formatted like this: ```<div>${title}</div>```.
 
+Flow graph:
+```
+source.file -> source-lang1.file -> translated content
+            -> source-lang2.file -> translated content
+```
 
 ### whitelist
 
-Type: Array(string)  
+Type: string|string[]  
 Default: ```undefined```
 
 This option allows to limit the number of translations that can be used. The names that are whitelisted need to match the filename 
 (without the extension). Any other files will still be loaded into the list of available dictionaries, but no files will be
-generated. The option is ignored if it is missing.
+generated. The option is ignored if it is missing. You can either define a single locale with a string or multiple with an array
+of strings.
 
 
 ### blacklist
 
-Type: Array(string)  
+Type: string|string[]  
 Default: ```undefined```
 
-The opposite of the whitelist. Any language specified here will be ignored during processing.
+The opposite of the whitelist. Any language specified here will be ignored during processing. You can either define a single locale 
+with a string or multiple with an array of strings.
 
 
 ### warn
@@ -164,6 +171,11 @@ When set to true the plugin will perform all operations for a translation, but w
 of the newly generated ones. If the settings is a regular expression then only files with a matching (original) filename will be 
 ignored.
 
+Flow graph:
+```
+source.file -> source.file -> original content
+```
+
 
 ### ignoreTokens
 
@@ -174,13 +186,26 @@ When set to true the plugin will ignore all tokens, but still create new files a
 differs from a dryRun, which would instead pass on the original file. If the settings is a regular expression then only files 
 with a matching (original) filename will be ignored.
 
+Flow graph:
+```
+source.file -> source-lang1.file -> original content
+            -> source-lang2.file -> original content
+```
 
 ### includeOriginal
 
-Type: boolean  
+Type: boolean|RegExp  
 Default: ```false```
 
-When set to true the original file is passed along the pipe as well along with all translated files.
+When set to true the original file is passed along the pipe as well along with all translated files. If the settings is a 
+regular expression then only files with a matching (original) filename will be included.
+
+Flow graph:
+```
+source.file -> source.file       -> original content
+            -> source-lang1.file -> translated content
+            -> source-lang2.file -> translated content
+```
 
 
 
@@ -313,6 +338,7 @@ token1={0} is {1}, isn't it?
 ```
 
 
+
 ## Feature Ideas for the future
 
 Maybe I'll implement these one day, maybe not.
@@ -322,3 +348,4 @@ Maybe I'll implement these one day, maybe not.
  * Warn about unused translation strings
  * Make translations available as environment variables in jade/js/coffeescript/etc. (although you can already replace strings anywhere)
  * Support streams... although that seems like a pain to implement
+ * Support printing of token trees if they are nested (as a json object that can e.g. be parsed by another script)
