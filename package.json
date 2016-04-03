@@ -1,6 +1,6 @@
 {
   "name": "gulp-international",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A gulp plugin that creates multi language versions of your source files",
   "license": "Apache-2.0",
   "homepage": "http://github.com/mallocator/gulp-international",

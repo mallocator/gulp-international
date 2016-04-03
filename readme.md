@@ -164,6 +164,15 @@ When set to true the plugin will perform all operations for a translation, but w
 of the newly generated ones.
 
 
+### ignoreTokens
+
+Type: boolean  
+Default: ```false```
+
+When set to true the plugin will ignore all tokens, but still create new files as if they were different for each language. This
+differs from a dryRun, which would instead pass on the original file.
+
+
 ### includeOriginal
 
 Type: boolean  
