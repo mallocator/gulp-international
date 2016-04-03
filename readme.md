@@ -348,4 +348,5 @@ Maybe I'll implement these one day, maybe not.
  * Warn about unused translation strings
  * Make translations available as environment variables in jade/js/coffeescript/etc. (although you can already replace strings anywhere)
  * Support streams... although that seems like a pain to implement
- * Support printing of token trees if they are nested (as a json object that can e.g. be parsed by another script)
+ * Support printing of token trees if they are nested (as a json object that can e.g. be parsed by another script... although at this
+ point you might just as well include the original source file and not have it run through here.)
