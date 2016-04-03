@@ -15,7 +15,8 @@ Features (cause we all love features):
  * Custom language descriptors
  * Custom filename format
  * Custom translation source directory
- * Read from .json, .js, .ini or .csv file (for examples check the test folder)
+ * Read from .json, .js, .ini or .csv file (for examples check the test folder),
+ * Filters for individual files
  
 
 
@@ -40,7 +41,7 @@ gulp.task('default', function () {
 });
 ```
 
-Or with your custom options of the out of box config dones't work:
+Or with your custom options if the out of box config doesn't work:
 
 ```js
 var gulp = require('gulp');
@@ -49,7 +50,7 @@ var international = require('gulp-international');
 gulp.task('default', function () {
 	return gulp.src('src/file.ext')
 		.pipe(international({
-		  whitelist: ['en_US']
+		  whitelist: 'en_US'
 		}))
 		.pipe(gulp.dest('dist'));
 });
@@ -65,10 +66,10 @@ gulp.task('default', function () {
 Type: string (path)  
 Default: ```./locales```
 
-This tells the script where to look for translation file. Currently supported are .json, .js and .ini files. Each format supports
+This tells the script where to look for translation files. Currently supported are .json, .js, .ini and .csv files. Each format supports
 nested keys (.ini only 1 level via sections). The name of the file is used for generating the output file. A source file with name
 ```index.html``` with a translation file called ```en_US.json``` would result in an output file called ```index-en_US.html```.  
-You don't have to use this format. Basically any name is valid for the file and will be used later on.
+You don't have to use this format. Basically any name is valid for the file and will be used later on as the language placeholder.
 
 
 ### filename
@@ -76,7 +77,7 @@ You don't have to use this format. Basically any name is valid for the file and 
 Type: string  
 Default: ```${path}/${name}-${lang}.${ext}```
 
-This options allows a user to configure the output format as desired. The default will generate all files in the same directory
+This options allows the user to configure the output format as desired. The default will generate all files in the same directory
 with the language suffix. A configuration to store each version in it's own path would be: ```${path}/${lang}/${name}.${ext}```
 
 
@@ -92,7 +93,7 @@ Default:
 ```
 
 The default configuration takes some queues from Android resources. The replacer is using the prefix to find tokens. The stopCondition 
-is used to determine where a token ends (exclusively). The defaults settings looks for either whitespace or a selection of special 
+is used to determine where a token ends (exclusively). The default settings look for either whitespace or a selection of special 
 characters. Examples of matchable resources are:
 
  * html: ```<div>R.title<div>```
@@ -111,11 +112,12 @@ would be
 
 This configuration would match any tokens formatted like this: ```<div>${title}</div>```.
 
-Flow graph:
+For help a flow graph of the files and content generated during the process:
 ```
 source.file -> source-lang1.file -> translated content
             -> source-lang2.file -> translated content
 ```
+
 
 ### whitelist
 
@@ -142,7 +144,7 @@ with a string or multiple with an array of strings.
 Type: boolean  
 Default: ```true```
 
-This enables warning to be printed out if any tokens are missing.
+This enables warnings to be printed out if any tokens are missing.
 
 
 ### cache
@@ -168,7 +170,7 @@ Type: boolean|RegExp
 Default: ```false```
 
 When set to true the plugin will perform all operations for a translation, but will pass on the original file along the pipe instead
-of the newly generated ones. If the settings is a regular expression then only files with a matching (original) filename will be 
+of the newly generated ones. If the setting is a regular expression then only files with a matching (original) filename will be 
 ignored.
 
 Flow graph:
@@ -183,7 +185,7 @@ Type: boolean|RegExp
 Default: ```false```
 
 When set to true the plugin will ignore all tokens, but still create new files as if they were different for each language. This
-differs from a dryRun, which would instead pass on the original file. If the settings is a regular expression then only files 
+differs from a dryRun, which would instead pass on the original file. If the setting is a regular expression then only files 
 with a matching (original) filename will be ignored.
 
 Flow graph:
@@ -197,7 +199,7 @@ source.file -> source-lang1.file -> original content
 Type: boolean|RegExp  
 Default: ```false```
 
-When set to true the original file is passed along the pipe as well along with all translated files. If the settings is a 
+When set to true the original file is passed along the pipe along with all translated files. If the setting is a 
 regular expression then only files with a matching (original) filename will be included.
 
 Flow graph:
@@ -253,12 +255,12 @@ module.exports = {
 }
 ```
 
-The tokens map the same way as a JSON file would. If you don't know which format to choose I would choose this one. 
+The tokens map the same way as a JSON file would. If you don't know which format to choose I would suggest this one. 
 
 
 ### CSV
 
-In this format all except for the last readable field will make up  the token. The last field will be the translation.
+In this format all except for the last readable field will make up the token. The last field will be the translation.
 To get the same output as with the previous examples the file would look something like this:
 
 ```
@@ -307,10 +309,10 @@ make this working is have a key in your definition with the name "lang".
 
 ### Placeholder formatting
 
-Again if you replace the string that is already there it is east to integrate with existing formatting functions. Run the plugin before 
+Again if you replace the string that is already there it is easy to integrate with existing formatting functions. Run the plugin before 
 the script is being executed and you can make use of formatters such as sprintf, util.format, console.log and others. Since it's common
 to use gulp for browser projects here's a simple formatting function you can make use of (taken from 
-[StackOverflow](http://stackoverflow.com/questions/1038746/equivalent-of-string-format-in-jquery):
+[StackOverflow](http://stackoverflow.com/questions/1038746/equivalent-of-string-format-in-jquery)):
  
 ```
 /**
@@ -344,8 +346,9 @@ token1={0} is {1}, isn't it?
 Maybe I'll implement these one day, maybe not.
 
  * Replace links to standard versions with internationalized versions (can probably also just be done with using tokens for imports)
- * Extract non code strings from source and list them as still missing translations
- * Warn about unused translation strings
+ * Extract non code strings from source and list them as still missing translations (difficult to doif this should work for any type of
+ source file
+ * Warn about unused translation strings (probably easy to do, but not sure if it's worth the effort)
  * Make translations available as environment variables in jade/js/coffeescript/etc. (although you can already replace strings anywhere)
  * Support streams... although that seems like a pain to implement
  * Support printing of token trees if they are nested (as a json object that can e.g. be parsed by another script... although at this
