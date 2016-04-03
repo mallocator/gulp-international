@@ -130,6 +130,23 @@ describe('gulp-international', () => {
     });
 
 
+    it('should only ignore matching files if the ignore tokens option is a regular expression', done => {
+      var options = {locales: 'test/locales', ignoreTokens: /hello/};
+      helper(options, files => {
+        expect(files.length).to.equal(4);
+        expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>R.token1</h1></body></html>');
+        expect(files[0].path).to.equal('test/helloworld-de_DE.html');
+        expect(files[1].contents.toString('utf8')).to.equal('<html><body><h1>R.token1</h1></body></html>');
+        expect(files[1].path).to.equal('test/helloworld-en_US.html');
+        expect(files[2].contents.toString('utf8')).to.equal('<html><body><h1>R.token1</h1></body></html>');
+        expect(files[2].path).to.equal('test/helloworld-fr_FR.html');
+        expect(files[3].contents.toString('utf8')).to.equal('<html><body><h1>R.token1</h1></body></html>');
+        expect(files[3].path).to.equal('test/helloworld-pt-BR.html');
+        done();
+      });
+    });
+
+
     it ('should include the original file as well as all translations', done => {
       var options = { locales: 'test/locales', includeOriginal: true };
       helper(options, files => {
