@@ -157,11 +157,12 @@ Allows to disable throwing of any errors that might occur so that the pipe will 
 
 ### dryRun
 
-Type: boolean  
+Type: boolean|RegExp  
 Default: ```false```
 
 When set to true the plugin will perform all operations for a translation, but will pass on the original file along the pipe instead
-of the newly generated ones.
+of the newly generated ones. If the settings is a regular expression then only files with a matching (original) filename will be 
+ignored.
 
 
 ### ignoreTokens
