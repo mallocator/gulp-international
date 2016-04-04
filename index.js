@@ -262,13 +262,14 @@ function replace(file, options) {
     var params = {};
     params.ext = path.extname(file.path).substr(1);
     params.name = path.basename(file.path, path.extname(file.path));
-    params.path = file.base.substr(0, file.base.length - 1);
+    params.path = file.path.substring(file.base.length, file.path.lastIndexOf('/'));
     params.lang = lang;
 
     var filePath = options.filename;
     for (var param in params) {
       filePath = filePath.replace('${' + param + '}', params[param]);
     }
+    filePath = path.join(file.base,filePath);
 
     var newFile = new gutil.File({
       base: file.base,
