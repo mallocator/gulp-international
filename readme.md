@@ -60,6 +60,18 @@ gulp.task('default', function () {
 
 ## Options
 
+This module tries to be very flexible with it's configuration option. For many options you can define either a boolean, a string, a 
+regular expression or an array with a mixture of string and regular expressions. If a boolean is passed in the option is simply set 
+to true or false for all files. If the option is a string the filename is searched for this substring. If the option is regular
+expression it is tested against each file, and finally if the option is an array the test is executed against every element of the
+array and accepted if any of the elements returns true with the previous rules defined. You could even nest arrays if you wanted to.
+
+An example:
+```
+options.ignoreTokens = [ 'de_DE', /en_*/ ]
+// => matches any english language as well the German translation for Germany
+```
+
 
 ### locales
 
@@ -137,19 +149,19 @@ source.file -> source-lang1.file -> translated content
 
 ### whitelist
 
-Type: string|string[]  
-Default: ```undefined```
+Type: boolean|string|string[]|RegExp|RegExp[]  
+Default: ```true```
 
 This option allows to limit the number of translations that can be used. The names that are whitelisted need to match the filename 
 (without the extension). Any other files will still be loaded into the list of available dictionaries, but no files will be
-generated. The option is ignored if it is missing. You can either define a single locale with a string or multiple with an array
-of strings.
+generated. The option will allow any locale if it's set to true. You can either define a single locale with a string/RegExp or multiple 
+with an array of strings and RegExp's.
 
 
 ### blacklist
 
-Type: string|string[]  
-Default: ```undefined```
+Type: boolean|string|string[]|RegExp|RegExp[]  
+Default: ```false```
 
 The opposite of the whitelist. Any language specified here will be ignored during processing. You can either define a single locale 
 with a string or multiple with an array of strings.
@@ -157,7 +169,7 @@ with a string or multiple with an array of strings.
 
 ### encodeEntities
 
-Type: boolean|RegExp|String  
+Type: boolean|string|string[]|RegExp|RegExp[]  
 Default: ```true```
 
 Any non utf8 characters that do not map to html are replaced with html entities if this option is enabled. A translation such as "über"
@@ -167,7 +179,7 @@ escaped. If the option is instead a string then the filename is searched for thi
 
 ### warn
 
-Type: boolean|RegExp|String  
+Type: boolean|string|string[]|RegExp|RegExp[]  
 Default: ```true```
 
 This enables warnings to be printed out if any tokens are missing. If the setting is a regular expression then only files with a matching 
@@ -185,7 +197,7 @@ on your configuration you might want to disable caching based on how your livere
 
 ### ignoreErrors
 
-Type: boolean|RegExp|String  
+Type: boolean|string|string[]|RegExp|RegExp[]  
 Default: ```false```
 
 Allows to disable throwing of any errors that might occur so that the pipe will continue executing. If the setting is a regular expression 
@@ -195,7 +207,7 @@ this substring.
 
 ### dryRun
 
-Type: boolean|RegExp|String  
+Type: boolean|string|string[]|RegExp|RegExp[]  
 Default: ```false```
 
 When set to true the plugin will perform all operations for a translation, but will pass on the original file along the pipe instead
@@ -210,7 +222,7 @@ source.file -> source.file -> original content
 
 ### ignoreTokens
 
-Type: boolean|RegExp  
+Type: boolean|string|string[]|RegExp|RegExp[]  
 Default: ```false```
 
 When set to true the plugin will ignore all tokens, but still create new files as if they were different for each language. This
@@ -225,7 +237,7 @@ source.file -> source-lang1.file -> original content
 
 ### includeOriginal
 
-Type: boolean|RegExp  
+Type: boolean|string|string[]|RegExp|RegExp[]  
 Default: ```false```
 
 When set to true the original file is passed along the pipe along with all translated files. If the setting is a regular expression then 

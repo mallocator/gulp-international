@@ -33,7 +33,8 @@ var defaults = {
     stopCondition: /[^\.\w_\-]/
   },
   filename: '${path}/${name}-${lang}.${ext}',
-  blacklist: [],
+  whitelist: true,
+  blacklist: false,
   warn: true,
   cache: true,
   ignoreErrors: false,
@@ -53,11 +54,20 @@ function trueOrMatch(needle, haystack) {
   if (needle === true) {
     return true;
   }
-  if (needle instanceof RegExp && needle.test(haystack)) {
+  if (_.isRegExp(needle) && needle.test(haystack)) {
     return true;
   }
-  return !!(needle instanceof String && haystack.indexOf(needle) !== -1);
-
+  if (_.isString(needle) && haystack.indexOf(needle) !== -1) {
+    return true;
+  }
+  if (needle instanceof Array) {
+    for (var i in needle) {
+      if (trueOrMatch(needle[i], haystack)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 
@@ -214,10 +224,8 @@ function csv2json(csvData) {
 function translate(options, contents, copied, filePath) {
   var processed = {};
   for (var lang in dictionaries) {
-    if (!options.whitelist || options.whitelist.indexOf(lang) != -1) {
-      if (!processed[lang] && options.blacklist.indexOf(lang) == -1) {
-        processed[lang] = '';
-      }
+    if (!processed[lang] && trueOrMatch(options.whitelist, lang) && !trueOrMatch(options.blacklist, lang)) {
+      processed[lang] = '';
     }
   }
   if (!Object.keys(processed).length) {
@@ -312,14 +320,6 @@ function replace(file, options) {
  * @returns {Stream}
  */
 module.exports = function(options) {
-  if (options) {
-    if (options.whitelist && !_.isArray(options.whitelist)) {
-      options.whitelist = [options.whitelist];
-    }
-    if (options.blacklist && !_.isArray(options.blacklist)) {
-      options.blacklist = [options.blacklist];
-    }
-  }
   options = _.assign({}, defaults, options);
   load(options);
 
