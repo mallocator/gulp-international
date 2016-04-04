@@ -23,7 +23,7 @@ var dictionaries = {};
 var cache = [];
 
 /**
- * Defauls options that are used if they are not overwritten by the user.
+ * Default options that are used if they are not overwritten by the user.
  * @type {Object}
  */
 var defaults = {
@@ -102,7 +102,8 @@ function load(options) {
       cache[options.locales] = dictionaries;
     }
   } catch (e) {
-    throw new Error('No translation dictionaries have been found!');
+    e.message = 'No translation dictionaries have been found!';
+    throw e;
   }
 }
 
@@ -214,9 +215,25 @@ function csv2json(csvData) {
 }
 
 /**
+ * Helper function that detects whether a buffer is binary or utf8.
+ * @param {Buffer} buffer
+ * @returns {boolean}
+ */
+function isBinary(buffer) {
+  var chunk = buffer.toString('utf8', 0, Math.min(buffer.length, 24));
+  for (var i in chunk) {
+    var charCode = chunk.charCodeAt(i);
+    if (charCode == 65533 || charCode <= 8) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Performs the actual translation from a tokenized source to the final content.
  * @param {Object} options
- * @param {String} contents
+ * @param {Buffer|String} contents
  * @param {number} copied
  * @param {String} filePath
  * @returns {Object}
@@ -231,8 +248,9 @@ function translate(options, contents, copied, filePath) {
   if (!Object.keys(processed).length) {
     throw new Error('No translation dictionaries available to create any files!');
   }
-  var i = contents.indexOf(options.delimiter.prefix);
-  if (!trueOrMatch(options.ignoreTokens, filePath)) {
+  if (!trueOrMatch(options.ignoreTokens, filePath) && !isBinary(contents)) {
+    contents = contents.toString('utf8');
+    var i = contents.indexOf(options.delimiter.prefix);
     while ((i !== -1)) {
       var endMatch, length, token, key;
       var tail = contents.substr(i);
@@ -264,7 +282,6 @@ function translate(options, contents, copied, filePath) {
         processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
       }
       copied = next;
-
       i = next;
     }
   }
@@ -283,7 +300,7 @@ function translate(options, contents, copied, filePath) {
  * @returns {File[]}
  */
 function replace(file, options) {
-  var contents = file.contents.toString('utf8');
+  var contents = file.contents;
   var copied = 0;
 
   var processed = translate(options, contents, copied, file.path);

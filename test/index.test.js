@@ -1,6 +1,8 @@
 'use strict';
 
+var crypto = require('crypto');
 var fs = require('fs');
+var stream = require('stream');
 
 var _ = require('lodash');
 var expect = require('chai').expect;
@@ -341,6 +343,17 @@ describe('gulp-international', () => {
     });
 
 
+    it('should pass binary content on without changing it', done => {
+      var bytes = crypto.randomBytes(1000);
+      var content = new Buffer(bytes, 'binary');
+      var options = { locales: 'test/locales', whitelist: 'en_US' };
+      helper(options, content, files => {
+        expect(files[0].contents).to.deep.equal(bytes);
+        done();
+      });
+    });
+
+
     it('should be able to process a larger file with multiple replacements', done => {
       var content = `
 <html>
@@ -453,7 +466,7 @@ function helper() {
   var content = '<html><body><h1>R.token1</h1></body></html>';
   var validatorCb;
   for(let param of arguments) {
-    if (_.isString(param)) {
+    if (_.isString(param) || _.isBuffer(param)) {
       content = param
     } else if (_.isFunction(param)) {
       validatorCb = param;
@@ -462,7 +475,11 @@ function helper() {
     }
   }
   expect(validatorCb).to.be.a('function');
-  expect(content).to.be.a('string');
+  try {
+    expect(content).to.be.a('string');
+  } catch (e) {
+    expect(content).to.be.instanceof(Buffer);
+  }
 
   var stream = plugin(options);
   var files = [];
@@ -476,7 +493,9 @@ function helper() {
     path: 'test/helloworld.html',
     cwd: 'test/',
     base: 'test/',
-    contents: new Buffer(content, 'utf8')
+    contents: _.isBuffer(content) || _.isObject(content) && content instanceof stream.Readable
+      ? content
+      : new Buffer(content, 'utf8')
   }));
   stream.end();
 }
