@@ -155,12 +155,23 @@ The opposite of the whitelist. Any language specified here will be ignored durin
 with a string or multiple with an array of strings.
 
 
-### warn
+### encodeEntities
 
-Type: boolean  
+Type: boolean|RegExp|String  
 Default: ```true```
 
-This enables warnings to be printed out if any tokens are missing.
+Any non utf8 characters that do not map to html are replaced with html entities if this option is enabled. A translation such as "über"
+would be replaced with "&uuml;ber". If the setting is a regular expression then only files with a matching (original) filename will be 
+escaped. If the option is instead a string then the filename is searched for this substring.
+
+
+### warn
+
+Type: boolean|RegExp|String  
+Default: ```true```
+
+This enables warnings to be printed out if any tokens are missing. If the setting is a regular expression then only files with a matching 
+(original) filename will throw warnings. If the option is instead a string then the filename is searched for this substring.
 
 
 ### cache
@@ -174,20 +185,22 @@ on your configuration you might want to disable caching based on how your livere
 
 ### ignoreErrors
 
-Type: boolean  
+Type: boolean|RegExp|String  
 Default: ```false```
 
-Allows to disable throwing of any errors that might occur so that the pipe will continue executing.
+Allows to disable throwing of any errors that might occur so that the pipe will continue executing. If the setting is a regular expression 
+then only files with a matching (original) filename will ignore errors. If the option is instead a string then the filename is searched for 
+this substring.
 
 
 ### dryRun
 
-Type: boolean|RegExp  
+Type: boolean|RegExp|String  
 Default: ```false```
 
 When set to true the plugin will perform all operations for a translation, but will pass on the original file along the pipe instead
 of the newly generated ones. If the setting is a regular expression then only files with a matching (original) filename will be 
-ignored.
+ignored. If the option is instead a string then the filename is searched for this substring.
 
 Flow graph:
 ```
@@ -202,7 +215,7 @@ Default: ```false```
 
 When set to true the plugin will ignore all tokens, but still create new files as if they were different for each language. This
 differs from a dryRun, which would instead pass on the original file. If the setting is a regular expression then only files 
-with a matching (original) filename will be ignored.
+with a matching (original) filename will be ignored. If the option is instead a string then the filename is searched for this substring.
 
 Flow graph:
 ```
@@ -215,8 +228,9 @@ source.file -> source-lang1.file -> original content
 Type: boolean|RegExp  
 Default: ```false```
 
-When set to true the original file is passed along the pipe along with all translated files. If the setting is a 
-regular expression then only files with a matching (original) filename will be included.
+When set to true the original file is passed along the pipe along with all translated files. If the setting is a regular expression then 
+only files with a matching (original) filename will be included. If the option is instead a string then the filename is searched for this 
+substring.
 
 Flow graph:
 ```

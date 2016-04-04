@@ -6,6 +6,7 @@ var path = require('path');
 var _ = require('lodash');
 var flat = require('flat');
 var gutil = require('gulp-util');
+var he = require('he');
 var through = require('through2');
 
 
@@ -38,8 +39,27 @@ var defaults = {
   ignoreErrors: false,
   dryRun: false,
   includeOriginal: false,
-  ignoreTokens: false
+  ignoreTokens: false,
+  encodeEntities: true
 };
+
+/**
+ * A helper function to test whether an option was set to true or the value matches the options regular expression.
+ * @param {boolean|string|RegExp} needle
+ * @param {String} haystack
+ * @returns {boolean}
+ */
+function trueOrMatch(needle, haystack) {
+  if (needle === true) {
+    return true;
+  }
+  if (needle instanceof RegExp && needle.test(haystack)) {
+    return true;
+  }
+  return !!(needle instanceof String && haystack.indexOf(needle) !== -1);
+
+}
+
 
 /**
  * Loads the dictionaries from the locale directory.
@@ -47,40 +67,39 @@ var defaults = {
  */
 function load(options) {
   if (cache[options.locales]) {
-    dictionaries = cache[options.locales];
-  } else {
-    try {
-      var files = fs.readdirSync(options.locales);
-      for (var i in files) {
-        var file = files[i];
-        switch (path.extname(file)) {
-          case '.json':
-          case '.js':
-            dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
-            break;
-          case '.ini':
-            var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-            dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
-            break;
-          case '.csv':
-            var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-            dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
-            break;
-        }
+    return dictionaries = cache[options.locales];
+  }
+  try {
+    var files = fs.readdirSync(options.locales);
+    for (var i in files) {
+      var file = files[i];
+      switch (path.extname(file)) {
+        case '.json':
+        case '.js':
+          dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
+          break;
+        case '.ini':
+          var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+          dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
+          break;
+        case '.csv':
+          var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+          dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
+          break;
       }
-      if (options.cache) {
-        cache[options.locales] = dictionaries;
-      }
-    } catch (e) {
-      throw new Error('No translation dictionaries have been found!');
     }
+    if (options.cache) {
+      cache[options.locales] = dictionaries;
+    }
+  } catch (e) {
+    throw new Error('No translation dictionaries have been found!');
   }
 }
 
 /**
  * Splits a line from an ini file into 2. Any subsequent '=' are ignored.
- * @param {string} line
- * @returns {string[]}
+ * @param {String} line
+ * @returns {String[]}
  */
 function splitIniLine(line) {
   var separator = line.indexOf('=');
@@ -95,7 +114,7 @@ function splitIniLine(line) {
 
 /**
  * Simple conversion helper to get a json file from an ini file.
- * @param {string} iniData
+ * @param {String} iniData
  * @returns {{}}
  */
 function ini2json(iniData) {
@@ -127,8 +146,8 @@ function ini2json(iniData) {
 
 /**
  * Converts a line of a CSV file to an array of strings, omitting empty fields.
- * @param {string} line
- * @returns {string[]}
+ * @param {String} line
+ * @returns {String[]}
  */
 function splitCsvLine(line) {
   if (!line.trim().length) {
@@ -163,7 +182,7 @@ function splitCsvLine(line) {
 
 /**
  * Simple conversion helper to get a json file from a csv file.
- * @param {string} csvData
+ * @param {String} csvData
  * @returns {Object}
  */
 function csv2json(csvData) {
@@ -187,9 +206,9 @@ function csv2json(csvData) {
 /**
  * Performs the actual translation from a tokenized source to the final content.
  * @param {Object} options
- * @param {string} contents
+ * @param {String} contents
  * @param {number} copied
- * @param {string} filePath
+ * @param {String} filePath
  * @returns {Object}
  */
 function translate(options, contents, copied, filePath) {
@@ -205,7 +224,7 @@ function translate(options, contents, copied, filePath) {
     throw new Error('No translation dictionaries available to create any files!');
   }
   var i = contents.indexOf(options.delimiter.prefix);
-  if (!(options.ignoreTokens === true || options.ignoreTokens instanceof RegExp && options.ignoreTokens.test(filePath))) {
+  if (!trueOrMatch(options.ignoreTokens, filePath)) {
     while ((i !== -1)) {
       var endMatch, length, token, key;
       var tail = contents.substr(i);
@@ -226,8 +245,12 @@ function translate(options, contents, copied, filePath) {
       for (var lang in processed) {
         processed[lang] += contents.substring(copied, i);
         if (dictionaries[lang][key] !== undefined) {
-          processed[lang] += dictionaries[lang][key];
-        } else if (options.warn) {
+          if (trueOrMatch(options.encodeEntities, filePath)) {
+            processed[lang] += he.encode(dictionaries[lang][key], { useNamedReferences: true });
+          } else {
+            processed[lang] += dictionaries[lang][key];
+          }
+        } else if (trueOrMatch(options.warn, filePath)) {
           gutil.log('Missing translation of language', lang, 'for key', key, 'in file', filePath);
         }
         processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
@@ -315,10 +338,10 @@ module.exports = function(options) {
 
     try {
       var files = replace(file, options);
-      if (options.dryRun === true || options.dryRun instanceof RegExp && options.dryRun.test(file.path)) {
+      if (trueOrMatch(options.dryRun, file.path)) {
         this.push(file);
       } else {
-        if (options.includeOriginal === true || options.includeOriginal instanceof RegExp && options.includeOriginal.test(file.path)) {
+        if (trueOrMatch(options.includeOriginal, file.path)) {
           this.push(file);
         }
         for (var i in files) {
@@ -326,7 +349,7 @@ module.exports = function(options) {
         }
       }
     } catch (err) {
-      if (!options.ignoreErrors) {
+      if (!trueOrMatch(options.ignoreErrors, file.path)) {
         this.emit('error', new gutil.PluginError('gulp-international', err));
       }
     }

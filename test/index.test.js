@@ -53,7 +53,7 @@ describe('gulp-international', () => {
 
 
     it('should not process languages on the blacklist', done => {
-      var options = { locales: 'test/locales', blacklist: 'en_US' };
+      var options = { locales: 'test/locales', blacklist: 'en_US', encodeEntities: false };
       helper(options, files => {
         expect(files.length).to.equal(3);
         expect(files[0].contents.toString('utf8')).to.equal('<html><body><h1>Inhalt1</h1></body></html>');
@@ -170,6 +170,16 @@ describe('gulp-international', () => {
 
       helper(options, content, () => {
         gently.verify();
+        done();
+      });
+    });
+
+
+    it('should translate html entities if the option is enabled (default)', done => {
+      var content = '<html><body><h1>R.entity</h1></body></html>';
+      var options = { locales: 'test/locales', whitelist: 'de_DE' };
+      helper(options, content, files => {
+        expect(files[0].contents.toString()).to.equal('<html><body><h1>S&uuml;p&auml;r Sp&auml;&szlig;&ouml;!</h1></body></html>');
         done();
       });
     });
@@ -345,7 +355,8 @@ describe('gulp-international', () => {
 `;
       var options = {
         locales: 'test/locales',
-        whitelist: ['en_US', 'pt-BR']
+        whitelist: ['en_US', 'pt-BR'],
+        encodeEntities: false
       };
       helper(options, content, files => {
         expect(files.length).to.equal(2);
