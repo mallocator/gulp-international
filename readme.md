@@ -77,8 +77,24 @@ You don't have to use this format. Basically any name is valid for the file and 
 Type: string  
 Default: ```${path}/${name}-${lang}.${ext}```
 
-This options allows the user to configure the output format as desired. The default will generate all files in the same directory
-with the language suffix. A configuration to store each version in it's own path would be: ```${path}/${lang}/${name}.${ext}```
+This option allows the user to configure the output format as desired. The default will generate all files in the same directory
+with the language suffix.
+
+There are 4 placeholders available:
+
+ * ```lang```: The filename of the translation file without extension (e.g. 'en_US')
+ * ```path```: The relative filepath inside the target directory (e.g. 'static')
+ * ```name```: The original filename (e.g. 'index')
+ * ```ext```: The original file extension (e.g. 'html')
+ 
+Here are a few examples of what the results would be:
+ 
+ ```
+ ${path}/${name}-${lang}.${ext} = static/index-en_US.html
+ ${lang}/${path}/${name}.${ext} = en_US/static/index.html
+ ${path}/${name}.${ext}.${lang} = static/index.html.en_US
+ ${lang}/${name}.${ext} = en_US/index.html   // ignores the path and copies everything in the same dir
+ ```
 
 
 ### delimiter
