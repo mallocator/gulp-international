@@ -1,6 +1,6 @@
 {
   "name": "gulp-international",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "A gulp plugin that creates multi language versions of your source files",
   "license": "Apache-2.0",
   "homepage": "http://github.com/mallocator/gulp-international",
@@ -36,25 +36,28 @@
     "internationalization",
     "replace",
     "substitute",
+    "lang",
     "language",
     "languages",
     "translation",
     "translations",
     "token",
-    "tokens"
+    "tokens",
+    "placeholder",
+    "resources"
   ],
   "dependencies": {
     "flat": "^2.0.0",
     "gulp-util": "^3.0.1",
-    "he": "^0.5.0",
-    "lodash": "^4.6.1",
+    "he": "^1.0.0",
+    "lodash": "^4.8.2",
     "through2": "^2.0.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.9",
     "gently": "^0.10.0",
-    "istanbul": "^0.4.2",
+    "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
     "mocha-lcov-reporter": "^1.2.0"
   }
