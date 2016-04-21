@@ -5,9 +5,17 @@
 [![Dependency Status](https://david-dm.org/mallocator/gulp-international.svg)](https://david-dm.org/mallocator/gulp-international) 
 
 This is a plugin for gulp that allows you to replace your custom placeholders for different language versions of your translations.
+Call it i18n, localization, translation or whatever you want, in the end it's basically a token replacer with multiple source 
+files to create multiple versions of your original.
 
-There are already a few plugins for i18n out there, but none of them seem to work properly. Rather than dig in their code I wanted
-to use this opportunity to learn how to write plugins for gulp.  
+There are a few other plugins out there that I've tried but couldn't quite get to do what I wanted. Maybe they work better for you:
+[gulp-i18n](https://www.npmjs.com/package/gulp-i18n) 
+[gulp-localize](https://www.npmjs.com/package/gulp-localize)
+[gulp-static-i18n](https://www.npmjs.com/package/gulp-static-i18n)
+[gulp-i18n-localize](https://www.npmjs.com/package/gulp-i18n-localize)
+[gulp-l10n](https://www.npmjs.com/package/gulp-l10n)
+Rather than dig in their code I wanted to use this opportunity to learn how to write plugins for gulp. So if none of those do the
+trick you can try this little plugin.
 
 Features (cause we all love features):
  
@@ -235,6 +243,7 @@ source.file -> source-lang1.file -> original content
             -> source-lang2.file -> original content
 ```
 
+
 ### includeOriginal
 
 Type: boolean|string|string[]|RegExp|RegExp[]  
@@ -250,6 +259,15 @@ source.file -> source.file       -> original content
             -> source-lang1.file -> translated content
             -> source-lang2.file -> translated content
 ```
+
+
+### verbose
+
+Type: boolean  
+Default: ```false```
+
+This option will log a lot more information to the console. Enable this if you can't quite get the plugin to do what you want it to and
+need some more details.
 
 
 
@@ -395,3 +413,5 @@ Maybe I'll implement these one day, maybe not.
  * Support streams... although that seems like a pain to implement
  * Support printing of token trees if they are nested (as a json object that can e.g. be parsed by another script... although at this
  point you might just as well include the original source file and not have it run through here.)
+ * Look for language files recursively
+ * Merge multiple language files (Using some sort of merge pattern? or by just merging files that have the same filename without ext & path)

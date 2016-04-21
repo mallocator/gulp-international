@@ -41,7 +41,8 @@ var defaults = {
   dryRun: false,
   includeOriginal: false,
   ignoreTokens: false,
-  encodeEntities: true
+  encodeEntities: true,
+  verbose: false
 };
 
 /**
@@ -77,28 +78,41 @@ function trueOrMatch(needle, haystack) {
  */
 function load(options) {
   if (cache[options.locales]) {
+    options.verbose && gutil.log('Skip loading cached translations from', options.locales);
     return dictionaries = cache[options.locales];
   }
   try {
+    options.verbose && gutil.log('Loading translations from', options.locales);
     var files = fs.readdirSync(options.locales);
+    var count = 0;
     for (var i in files) {
       var file = files[i];
       switch (path.extname(file)) {
         case '.json':
         case '.js':
           dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
+          options.verbose && gutil.log('Added translations from', file);
+          count++;
           break;
         case '.ini':
           var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
           dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
+          options.verbose && gutil.log('Added translations from', file);
+          count++;
           break;
         case '.csv':
           var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
           dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
+          options.verbose && gutil.log('Added translations from', file);
+          count++;
           break;
+        default:
+          options.verbose && gutil.log('Ignored file', file);
       }
     }
+    options.verbose && gutil.log('Loaded', count,  'translations from', options.locales);
     if (options.cache) {
+      options.verbose && gutil.log('Cashing translations from', options.locales);
       cache[options.locales] = dictionaries;
     }
   } catch (e) {
@@ -248,7 +262,12 @@ function translate(options, contents, copied, filePath) {
   if (!Object.keys(processed).length) {
     throw new Error('No translation dictionaries available to create any files!');
   }
-  if (!trueOrMatch(options.ignoreTokens, filePath) && !isBinary(contents)) {
+  options.verbose && gutil.log('Starting translation for', processed.length, 'languages');
+  if (trueOrMatch(options.ignoreTokens, filePath)) {
+    options.verbose && gutil.log('Ignoring file', filePath, 'because of ignoreTokens option');
+  } else if(isBinary(contents)) {
+    options.verbose && gutil.log('Ignoring file', filePath, 'because file is binary');
+  } else {
     contents = contents.toString('utf8');
     var i = contents.indexOf(options.delimiter.prefix);
     while ((i !== -1)) {
@@ -276,7 +295,7 @@ function translate(options, contents, copied, filePath) {
           } else {
             processed[lang] += dictionaries[lang][key];
           }
-        } else if (trueOrMatch(options.warn, filePath)) {
+        } else if (options.verbose || trueOrMatch(options.warn, filePath)) {
           gutil.log('Missing translation of language', lang, 'for key', key, 'in file', filePath);
         }
         processed[lang] += contents.substring(i + length, next == -1 ? contents.length : next);
@@ -287,6 +306,7 @@ function translate(options, contents, copied, filePath) {
   }
   for (var lang in processed) {
     if (!processed[lang].length) {
+      options.verbose && gutil.log('Copying original content to target language', lang, 'because no replacements have happened');
       processed[lang] = contents;
     }
   }
@@ -337,8 +357,11 @@ function replace(file, options) {
  * @returns {Stream}
  */
 module.exports = function(options) {
+  options.verbose && gutil.log('gulp-international is starting');
   options = _.assign({}, defaults, options);
   load(options);
+
+  options.verbose && gutil.log('Parsed options:', JSON.toString(options));
 
   module.exports.options = options;
   module.exports.dictionaries = dictionaries;
@@ -350,18 +373,22 @@ module.exports = function(options) {
     }
 
     if (file.isStream()) {
+      options.verbose && gutil.log('gulp-international is skipping stream processing as it only supports buffered files.');
       return cb(new gutil.PluginError('gulp-international', 'Streaming not supported'));
     }
 
     try {
       var files = replace(file, options);
       if (trueOrMatch(options.dryRun, file.path)) {
+        options.verbose && gutil.log('Ignoring all translations and passing on original file because "dryRun" was set');
         this.push(file);
       } else {
         if (trueOrMatch(options.includeOriginal, file.path)) {
+          options.verbose && gutil.log('Passing on original file because "includeOriginal" was set');
           this.push(file);
         }
         for (var i in files) {
+          options.verbose && gutil.log('Passing on translated file', files[i].path);
           this.push(files[i]);
         }
       }
@@ -371,6 +398,7 @@ module.exports = function(options) {
       }
     }
 
+    options.verbose && gutil.log('gulp-international has finished');
     cb();
   });
 };

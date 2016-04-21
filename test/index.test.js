@@ -185,7 +185,22 @@ describe('gulp-international', () => {
         done();
       });
     });
+
+
+    it('should log a lot more when verbose is enabled', done => {
+      var content = '<html><body><h1>R.emptyToken</h1></body></html>';
+      var options = {
+        locales: 'test/locales',
+        verbose: true
+      };
+      gently.expect(gutil, 'log', 12, function () {});
+      helper(options, content, () => {
+        gently.verify();
+        done();
+      });
+    });
   });
+
 
   describe('Error cases', () => {
 
