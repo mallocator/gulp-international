@@ -14,6 +14,47 @@ var plugin = require('../');
 
 
 describe('gulp-international', () => {
+  /**
+   * Performs common tasks that need to be run for every test. Makes setting up and understanding tests way easier.
+   */
+  function helper() {
+    var options = {};
+    var content = '<html><body><h1>R.token1</h1></body></html>';
+    var validatorCb;
+    for(let param of arguments) {
+      if (_.isString(param) || _.isBuffer(param)) {
+        content = param
+      } else if (_.isFunction(param)) {
+        validatorCb = param;
+      } else if (_.isObject(param)) {
+        options = param;
+      }
+    }
+    expect(validatorCb).to.be.a('function');
+    try {
+      expect(content).to.be.a('string');
+    } catch (e) {
+      expect(content).to.be.instanceof(Buffer);
+    }
+
+    var stream = plugin(options);
+    var files = [];
+    stream.on('data', file => {
+      files.push(file);
+    });
+    stream.on('finish', () => {
+      validatorCb(files, plugin.options);
+    });
+    stream.write(new File({
+      path: 'test/helloworld.html',
+      cwd: 'test/',
+      base: 'test/',
+      contents: _.isBuffer(content) || _.isObject(content) && content instanceof stream.Readable
+        ? content
+        : new Buffer(content, 'utf8')
+    }));
+    stream.end();
+  }
 
   describe('Usage Examples', () => {
 
@@ -472,45 +513,3 @@ describe('gulp-international', () => {
     });
   });
 });
-
-/**
- * Performs common tasks that need to be run for every test. Makes setting up and understanding tests way easier.
- */
-function helper() {
-  var options = {};
-  var content = '<html><body><h1>R.token1</h1></body></html>';
-  var validatorCb;
-  for(let param of arguments) {
-    if (_.isString(param) || _.isBuffer(param)) {
-      content = param
-    } else if (_.isFunction(param)) {
-      validatorCb = param;
-    } else if (_.isObject(param)) {
-      options = param;
-    }
-  }
-  expect(validatorCb).to.be.a('function');
-  try {
-    expect(content).to.be.a('string');
-  } catch (e) {
-    expect(content).to.be.instanceof(Buffer);
-  }
-
-  var stream = plugin(options);
-  var files = [];
-  stream.on('data', file => {
-    files.push(file);
-  });
-  stream.on('finish', () => {
-    validatorCb(files, plugin.options);
-  });
-  stream.write(new File({
-    path: 'test/helloworld.html',
-    cwd: 'test/',
-    base: 'test/',
-    contents: _.isBuffer(content) || _.isObject(content) && content instanceof stream.Readable
-      ? content
-      : new Buffer(content, 'utf8')
-  }));
-  stream.end();
-}

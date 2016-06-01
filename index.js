@@ -71,56 +71,6 @@ function trueOrMatch(needle, haystack) {
   return false;
 }
 
-
-/**
- * Loads the dictionaries from the locale directory.
- * @param {Object} options
- */
-function load(options) {
-  if (cache[options.locales]) {
-    options.verbose && gutil.log('Skip loading cached translations from', options.locales);
-    return dictionaries = cache[options.locales];
-  }
-  try {
-    options.verbose && gutil.log('Loading translations from', options.locales);
-    var files = fs.readdirSync(options.locales);
-    var count = 0;
-    for (var i in files) {
-      var file = files[i];
-      switch (path.extname(file)) {
-        case '.json':
-        case '.js':
-          dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
-          options.verbose && gutil.log('Added translations from', file);
-          count++;
-          break;
-        case '.ini':
-          var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-          dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
-          options.verbose && gutil.log('Added translations from', file);
-          count++;
-          break;
-        case '.csv':
-          var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
-          dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
-          options.verbose && gutil.log('Added translations from', file);
-          count++;
-          break;
-        default:
-          options.verbose && gutil.log('Ignored file', file);
-      }
-    }
-    options.verbose && gutil.log('Loaded', count,  'translations from', options.locales);
-    if (options.cache) {
-      options.verbose && gutil.log('Cashing translations from', options.locales);
-      cache[options.locales] = dictionaries;
-    }
-  } catch (e) {
-    e.message = 'No translation dictionaries have been found!';
-    throw e;
-  }
-}
-
 /**
  * Splits a line from an ini file into 2. Any subsequent '=' are ignored.
  * @param {String} line
@@ -128,13 +78,13 @@ function load(options) {
  */
 function splitIniLine(line) {
   var separator = line.indexOf('=');
-  if (separator == -1) {
+  if (separator === -1) {
     return [line];
   }
   return [
     line.substr(0, separator),
     line.substr(separator + 1)
-  ]
+  ];
 }
 
 /**
@@ -152,8 +102,8 @@ function ini2json(iniData) {
       fields[j] = fields[j].trim();
     }
     if (fields[0].length) {
-      if (fields[0].indexOf('[')==0) {
-        context = fields[0].substring(1, fields[0].length -1)
+      if (fields[0].indexOf('[')===0) {
+        context = fields[0].substring(1, fields[0].length - 1);
       } else {
         if (context) {
           if (!result[context]) {
@@ -226,6 +176,55 @@ function csv2json(csvData) {
     }
   }
   return result;
+}
+
+/**
+ * Loads the dictionaries from the locale directory.
+ * @param {Object} options
+ */
+function load(options) {
+  if (cache[options.locales]) {
+    options.verbose && gutil.log('Skip loading cached translations from', options.locales);
+    return dictionaries = cache[options.locales];
+  }
+  try {
+    options.verbose && gutil.log('Loading translations from', options.locales);
+    var files = fs.readdirSync(options.locales);
+    var count = 0;
+    for (var i in files) {
+      var file = files[i];
+      switch (path.extname(file)) {
+        case '.json':
+        case '.js':
+          dictionaries[path.basename(file, path.extname(file))] = flat(require(path.join(process.cwd(), options.locales, file)));
+          options.verbose && gutil.log('Added translations from', file);
+          count++;
+          break;
+        case '.ini':
+          var iniData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+          dictionaries[path.basename(file, path.extname(file))] = flat(ini2json(iniData));
+          options.verbose && gutil.log('Added translations from', file);
+          count++;
+          break;
+        case '.csv':
+          var csvData = fs.readFileSync(path.join(process.cwd(), options.locales, file));
+          dictionaries[path.basename(file, path.extname(file))] = csv2json(csvData);
+          options.verbose && gutil.log('Added translations from', file);
+          count++;
+          break;
+        default:
+          options.verbose && gutil.log('Ignored file', file);
+      }
+    }
+    options.verbose && gutil.log('Loaded', count,  'translations from', options.locales);
+    if (options.cache) {
+      options.verbose && gutil.log('Cashing translations from', options.locales);
+      cache[options.locales] = dictionaries;
+    }
+  } catch (e) {
+    e.message = 'No translation dictionaries have been found!';
+    throw e;
+  }
 }
 
 /**
@@ -304,10 +303,10 @@ function translate(options, contents, copied, filePath) {
       i = next;
     }
   }
-  for (var lang in processed) {
-    if (!processed[lang].length) {
-      options.verbose && gutil.log('Copying original content to target language', lang, 'because no replacements have happened');
-      processed[lang] = contents;
+  for (var procLang in processed) {
+    if (!processed[procLang].length) {
+      options.verbose && gutil.log('Copying original content to target language', procLang, 'because no replacements have happened');
+      processed[procLang] = contents;
     }
   }
   return processed;
