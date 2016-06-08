@@ -1,3 +1,5 @@
+/* global describe, it, beforeEach, afterEach */
+
 'use strict';
 
 var crypto = require('crypto');
@@ -23,7 +25,7 @@ describe('gulp-international', () => {
     var validatorCb;
     for(let param of arguments) {
       if (_.isString(param) || _.isBuffer(param)) {
-        content = param
+        content = param;
       } else if (_.isFunction(param)) {
         validatorCb = param;
       } else if (_.isObject(param)) {

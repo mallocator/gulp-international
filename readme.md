@@ -381,7 +381,7 @@ to use gulp for browser projects here's a simple formatting function you can mak
  */
 String.prototype.format = function () {
     var args = arguments;
-    return this.replace(/\{\{|\}\}|\{(\d+)\}/g, function (m, n) {
+    return this.replace(/\{\{|}}|\{(\d+)}/g, function (m, n) {
         if (m == "{{") { return "{"; }
         if (m == "}}") { return "}"; }
         return args[n];
