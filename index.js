@@ -27,12 +27,12 @@ var cache = [];
  * @type {Object}
  */
 var defaults = {
-  locales: './locales',
+  locales: '.' + path.sep + 'locales',
   delimiter: {
     prefix: 'R.',
     stopCondition: /[^\.\w_\-]/
   },
-  filename: '${path}/${name}-${lang}.${ext}',
+  filename: '${path}' + path.sep + '${name}-${lang}.${ext}',
   whitelist: true,
   blacklist: false,
   warn: true,
@@ -329,7 +329,7 @@ function replace(file, options) {
     var params = {};
     params.ext = path.extname(file.path).substr(1);
     params.name = path.basename(file.path, path.extname(file.path));
-    params.path = file.path.substring(file.base.length, file.path.lastIndexOf('/'));
+    params.path = file.path.substring(file.base.length, file.path.lastIndexOf(path.sep));
     params.lang = lang;
 
     var filePath = options.filename;
