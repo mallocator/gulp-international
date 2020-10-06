@@ -2,7 +2,8 @@
 [![npm version](https://badge.fury.io/js/gulp-international.svg)](http://badge.fury.io/js/gulp-international)
 [![Build Status](https://travis-ci.org/mallocator/gulp-international.svg?branch=master)](https://travis-ci.org/mallocator/gulp-international)
 [![Coverage Status](https://coveralls.io/repos/mallocator/gulp-international/badge.svg?branch=master&service=github)](https://coveralls.io/github/mallocator/gulp-international?branch=master)
-[![Dependency Status](https://david-dm.org/mallocator/gulp-international.svg)](https://david-dm.org/mallocator/gulp-international) 
+[![Dependency Status](https://david-dm.org/mallocator/gulp-international.svg)](https://david-dm.org/mallocator/gulp-international) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmallocator%2Fgulp-international.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmallocator%2Fgulp-international?ref=badge_shield)
+
 
 This is a plugin for gulp that allows you to replace your custom placeholders for different language versions of your translations.
 Call it i18n, localization, translation or whatever you want, in the end it's basically a token replacer with multiple source 
@@ -415,3 +416,7 @@ Maybe I'll implement these one day, maybe not.
  point you might just as well include the original source file and not have it run through here.)
  * Look for language files recursively
  * Merge multiple language files (Using some sort of merge pattern? or by just merging files that have the same filename without ext & path)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmallocator%2Fgulp-international.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmallocator%2Fgulp-international?ref=badge_large)
